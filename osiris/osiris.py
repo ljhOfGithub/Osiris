@@ -67,8 +67,8 @@ def extract_bin_str(s):
     Extracts binary representation of smart contract from solc output.
     '''
     binary_regex = r"\r?\n======= (.*?) =======\r?\nBinary of the runtime part: \r?\n(.*?)\r?\n"
-    contracts = re.findall(binary_regex, s)
-    contracts = [contract for contract in contracts if contract[1]]
+    contracts = re.findall(binary_regex, s)#.*?懒惰，()运算符优先级最高，返回匹配的字符串构成一个列表,?贪婪模式，
+    contracts = [contract for contract in contracts if contract[1]]#除了符号表外的符号不匹配，匹配前后两个(.*?),第二个匹配成功说明编译成功
     if not contracts:
         logging.critical("Solidity compilation failed")
         print "======= error ======="
@@ -79,12 +79,13 @@ def extract_bin_str(s):
 def compileContracts(contract):
     '''
     Calls solc --bin-runtime to compile contract and returns binary representation of contract.
+    调用solc——bin-runtime编译契约并返回契约的二进制表示
     '''
-    cmd = "solc --bin-runtime %s" % contract
+    cmd = "solc --bin-runtime %s" % contract#运行时编译
     out = run_command(cmd)
 
-    libs = re.findall(r"_+(.*?)_+", out)
-    libs = set(libs)
+    libs = re.findall(r"_+(.*?)_+", out)#返回列表
+    libs = set(libs)#列表转化为集合，去重
     if libs:
         return link_libraries(contract, libs)
     else:
@@ -98,14 +99,14 @@ def link_libraries(filename, libs):
     option = ""
     for idx, lib in enumerate(libs):
         lib_address = "0x" + hex(idx+1)[2:].zfill(40)
-        option += " --libraries %s:%s" % (lib, lib_address)
+        option += " --libraries %s:%s" % (lib, lib_address)#添加编译选项，用到额外的库的编译命令，库名和库地址
     FNULL = open(os.devnull, 'w')
     cmd = "solc --bin-runtime %s" % filename
-    p1 = subprocess.Popen(shlex.split(cmd), stdout=subprocess.PIPE, stderr=FNULL)
+    p1 = subprocess.Popen(shlex.split(cmd), stdout=subprocess.PIPE, stderr=FNULL)#
     cmd = "solc --link%s" %option
     p2 = subprocess.Popen(shlex.split(cmd), stdin=p1.stdout, stdout=subprocess.PIPE, stderr=FNULL)
     p1.stdout.close()
-    out = p2.communicate()[0]
+    out = p2.communicate()[0]#得到p2执行的输出结果，[0]表示stdout的值
     return extract_bin_str(out)
 
 def analyze(processed_evm_file, disasm_file, source_map = None):
