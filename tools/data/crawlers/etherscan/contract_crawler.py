@@ -12,20 +12,20 @@ from bson.decimal128 import Decimal128
 from pymongo import MongoClient
 
 web3 = Web3(KeepAliveRPCProvider(host='127.0.0.1', port='8545'))
-latestBlock = web3.eth.getBlock('latest')
+latestBlock = web3.eth.getBlock('latest')#最新区块
 exitFlag = 0
 
 nrOfTransactions = {}
 
 def init():
-    if web3.eth.syncing == False:
-        print('Ethereum blockchain is up-to-date.')
+    if web3.eth.syncing == False:#还没更新到最新的区块链状态
+        print('Ethereum blockchain is up-to-date.')#上次更新到的区块链状态
         print('Latest block: '+str(latestBlock.number)+' ('+datetime.datetime.fromtimestamp(int(latestBlock.timestamp)).strftime('%d-%m-%Y %H:%M:%S')+')\n')
     else:
         print('Ethereum blockchain is currently syncing...')
         print('Latest block: '+str(latestBlock.number)+' ('+datetime.datetime.fromtimestamp(int(latestBlock.timestamp)).strftime('%d-%m-%Y %H:%M:%S')+')\n')
 
-class searchThread(threading.Thread):
+class searchThread(threading.Thread):#多线程
    def __init__(self, threadID, queue, collection):
       threading.Thread.__init__(self)
       self.threadID = threadID
