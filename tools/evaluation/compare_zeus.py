@@ -6,8 +6,8 @@ import json
 import csv
 import math
 
-from collections import Counter
-
+from collections import Counter#collections这个模块实现了特定目标的容器，以提供Python标准内建容器 dict , list , set , 和 tuple 的替代选择。
+#Counter:字典的子类，提供了可哈希对象的计数功能
 FOLDER = "zeus_results"
 
 global total
@@ -50,7 +50,7 @@ def mean(x):
 
 def median(x):
     # Input: list of numbers; Output: the "middle" number of an ordered list of #s
-
+    #输入:数字列表;输出:一个有序列表的“中间”号
     sorted_x = sorted(x)
     length_n = len(x)
 
@@ -63,12 +63,12 @@ def median(x):
     else:
         return(sorted_x[middle]) # Return middle number
 
-def variance(x):
+def variance(x):#方差
      n = len(x)
      x_bar = mean(x)
      return(round(sum((x_i - x_bar)**2 for x_i in x) / (n - 1), 2))
 
-def standard_deviation(x):
+def standard_deviation(x):#标准差
      return(math.sqrt(variance(x)))
 
 def evaluate_contract(contract):
@@ -92,7 +92,7 @@ def evaluate_contract(contract):
 
     global timeout
 
-    if contract["overflow"] != False:
+    if contract["overflow"] != False:#没有漏洞
         overflow = True
     if contract["underflow"] != False:
         underflow = True
@@ -100,27 +100,27 @@ def evaluate_contract(contract):
     if contract["timeout"] != False:
         timeout = True
 
-    if overflow or underflow:
+    if overflow or underflow:#有漏洞
         vulnearable += 1
 
     time += float(contract["execution_time"])
-    time_array.append(round(float(contract["execution_time"])))
-    paths += int(contract["execution_paths"])
-    coverage += float(contract["evm_code_coverage"])
+    time_array.append(round(float(contract["execution_time"])))#返回合约执行时间浮点数的四舍五入值
+    paths += int(contract["execution_paths"])#
+    coverage += float(contract["evm_code_coverage"])#
     nr_contracts += 1
     if min_paths == 0 or int(contract["execution_paths"]) < min_paths:
         min_paths = int(contract["execution_paths"])
     if max_paths == 0 or int(contract["execution_paths"]) > max_paths:
         max_paths = int(contract["execution_paths"])
 
-print("Evaluating results...")
+print("Evaluating results...")#
 
 for file in os.listdir(os.path.join("..", FOLDER)):
     if file.endswith(".json"):
-        total += 1
+        total += 1#分析的json文件数+1
         try:
-            data = json.load(open(os.path.join(os.path.join("..", FOLDER), file)))
-
+            data = json.load(open(os.path.join(os.path.join("..", FOLDER), file)))#对象->字典
+            #https://docs.python.org/zh-cn/3/library/json.html#json-to-py-table
             global overflow
             global underflow
 
@@ -132,7 +132,7 @@ for file in os.listdir(os.path.join("..", FOLDER)):
             timeout     = False
 
             if not "evm_code_coverage" in data:
-                for contract in data:
+                for contract in data:#data是contract对象(字典)嵌套字典
                     evaluate_contract(data[contract])
             else:
                 evaluate_contract(data)
@@ -160,7 +160,7 @@ for file in os.listdir(os.path.join("..", FOLDER)):
 
 print "Number of analyzed contracts: "+str(total)
 print "Total execution time: "+str(time)+" seconds, avg: "+str(float(time)/float(nr_contracts))+" seconds"
-print Counter(time_array).most_common(2)
+print Counter(time_array).most_common(2)#返回一个列表，其中包含 2 个最常见的元素及出现次数，按常见程度由高到低排序。 
 print median(time_array)
 print variance(time_array)
 print standard_deviation(time_array)

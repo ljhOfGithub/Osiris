@@ -13,7 +13,7 @@ from web3 import Web3, HTTPProvider
 from bson.decimal128 import Decimal128
 from pymongo import MongoClient
 
-web3 = Web3(HTTPProvider('http://127.0.0.1:8545'))
+web3 = Web3(HTTPProvider('http://127.0.0.1:8545'))#这一步是连接到以太坊节点
 latestBlock = web3.eth.getBlock('latest')
 exitFlag = 0
 
@@ -155,7 +155,7 @@ if __name__ == "__main__":
 
     print('Searching for '+str(q.qsize())+' tokens...\n')
 
-    # Wait for queue to empty
+    # Wait for queue to empty所有的token都爬完了
     while not q.empty():
         pass
 
