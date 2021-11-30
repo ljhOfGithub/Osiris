@@ -11,6 +11,8 @@ log = logging.getLogger(__name__)
 
 # THIS IS TO DEFINE A SKELETON FOR ANALYSIS
 # FOR NEW TYPE OF ANALYSIS: add necessary details to the skeleton functions
+#定义分析的框架
+#新的分析类型:为骨架函数添加必要的细节
 cur_file = ""
 reported = False
 reentrancy_report_file = "re_report.report"
