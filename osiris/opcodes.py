@@ -1,5 +1,6 @@
 # list of all opcodes except the PUSHi and DUPi
 # opcodes[name] has a list of [value (index), no. of items removed from stack, no. of items added to stack]
+# opcodes[name]有一个[value (index)，从堆栈中删除的项数，添加到堆栈中的项数]的列表
 opcodes = {
     "STOP": [0x00, 0, 0],
     "ADD": [0x01, 2, 1],
