@@ -101,8 +101,12 @@ def link_libraries(filename, libs):
         lib_address = "0x" + hex(idx+1)[2:].zfill(40)
         option += " --libraries %s:%s" % (lib, lib_address)#添加编译选项，用到额外的库的编译命令，库名和库地址
     FNULL = open(os.devnull, 'w')
+    #如果需要获取 ExitCode，又不想看到输出信息。可以将 stdout 重定位到 /dev/null。
+    #>>> null = open(os.devnull, "w")
+    #>>> call(split("ls -l"), stdout = null, stderr = null)
+    #0
     cmd = "solc --bin-runtime %s" % filename
-    p1 = subprocess.Popen(shlex.split(cmd), stdout=subprocess.PIPE, stderr=FNULL)#
+    p1 = subprocess.Popen(shlex.split(cmd), stdout=subprocess.PIPE, stderr=FNULL)#省略出错信息
     cmd = "solc --link%s" %option
     p2 = subprocess.Popen(shlex.split(cmd), stdin=p1.stdout, stdout=subprocess.PIPE, stderr=FNULL)
     p1.stdout.close()
@@ -115,12 +119,14 @@ def analyze(processed_evm_file, disasm_file, source_map = None):
         Parameters
     ----------
     processed_evm_file : File descriptor of EVM bytecode file on which "removeSwarmHash" has been removed  TODO: Why not remove this argument and process disasm_file as necessary within analyze()? This way, the function makes implicit assumptions about the relation between those two arguments.
+    已删除“removeSwarmHash”的EVM字节码文件的文件描述符
     disasm_file: File descriptor of the original EVM asm file
+    原始EVM asm文件的文件描述符
     source_map: SourceMap of compiled contracts
     '''
     disasm_out = ""
 
-    # Check if processed_evm_file can be disassembled
+    # Check if processed_evm_file can be disassembled检查processsed_evm_file是否可以被反汇编
     # TODO: Why this check? The result is not used anyway and it is not said that processed_evm_file is related to disasm_file.
     try:
         disasm_p = subprocess.Popen(
