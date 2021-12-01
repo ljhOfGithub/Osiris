@@ -5,19 +5,19 @@ import traceback
 from utils import *
 from z3 import *
 
-def enum(**named_values):
+def enum(**named_values):#python在参数名之前使用2个星号来支持任意多的关键字参数。
     return type('Enum', (), named_values)
 
 ErrorTypes = enum(OVERFLOW='Overflow', UNDERFLOW='Underflow', SIGNEDNESS='Signedness', DIVISION='Division', MODULO='Modulo', WIDTH_CONVERSION='Width conversion')
 
-IntegerTypes = enum(TOP='Top', SIGNED='Signed', UNSIGNED='Unsigned', BOTTOM='Bottom')
+IntegerTypes = enum(TOP='Top', SIGNED='Signed', UNSIGNED='Unsigned', BOTTOM='Bottom')#枚举变量
 
 conversions = []
 
-def get_int_size(x):
+def get_int_size(x):#获得下一个更大的和x同奇偶的自然数
     return x + 2 if is_int_signed(x) else x + 1
 
-def is_int_signed(x):
+def is_int_signed(x):#偶数
     return (x % 2 == 0)
 
 def initialize_var(var, type_information):
@@ -266,6 +266,7 @@ def multiplication_overflow_check(multiplier, multiplicand, analysis, instructio
         print("===================================================")
 
     # Infer information from the multiplier
+    #从乘数推断信息
     multiplier_size = 256
     multiplier_sign = False
     try:
@@ -283,6 +284,7 @@ def multiplication_overflow_check(multiplier, multiplicand, analysis, instructio
         print("---> multiplier ("+str(multiplier_size)+"): "+str(multiplier))
 
     # Infer information from the multiplicand
+    #从被乘数推断信息
     multiplicand_size = 256
     multiplicand_sign = False
     try:
@@ -300,6 +302,7 @@ def multiplication_overflow_check(multiplier, multiplicand, analysis, instructio
         print("---> multiplicand ("+str(multiplicand_size)+"): "+str(multiplicand))
 
     # Infer the size of the larger operand
+    #推断较大操作数的大小
     if multiplier_size == 256 or multiplicand_size == 256:
         if isReal(multiplier) or multiplier.__class__.__name__ == "BitVecNumRef" or isReal(multiplicand) or multiplicand.__class__.__name__ == "BitVecNumRef":
             max_size = max(multiplier_size, multiplicand_size)
@@ -326,6 +329,7 @@ def multiplication_overflow_check(multiplier, multiplicand, analysis, instructio
         s.add(path_conditions)
 
     # Add contraint for unsigned multiplication overflow checking
+    #添加无符号乘法溢出检查约束
     if multiplier_sign == False and multiplicand_sign == False:
         if max_size == 256:
             if multiplier.__class__.__name__ == "BitVecRef" and multiplicand.__class__.__name__ == "BitVecRef":

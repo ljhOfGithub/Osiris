@@ -30,9 +30,9 @@ from taintFlow import *
 import web3
 from web3 import Web3, IPCProvider
 
-log = logging.getLogger(__name__)
+log = logging.getLogger(__name__)#返回具有指定 name 的日志记录器，或者当 name 为 None 时返回层级结构中的根日志记录器。
 
-UNSIGNED_BOUND_NUMBER = 2**256 - 1
+UNSIGNED_BOUND_NUMBER = 2**256 - 1#无符号数的最大数
 CONSTANT_ONES_159 = BitVecVal((1 << 160) - 1, 256)
 
 Assertion = namedtuple('Assertion', ['pc', 'model'])
@@ -97,10 +97,12 @@ def initGlobalVars():
     arithmetic_models = {}
 
     # capturing the last statement of each basic block
+    # 捕获每个基本块的最后一个语句 end_instruction_dictionary
     global end_ins_dict
     end_ins_dict = {}
 
     # capturing all the instructions, keys are corresponding addresses
+    # 捕获所有的指令，键是对应的地址
     global instructions
     instructions = {}
 
@@ -127,6 +129,7 @@ def initGlobalVars():
     data_flow_all_paths = [[], []] # store all storage addresses
 
     # store the path condition corresponding to each path in money_flow_all_paths
+    #在money_flow_all_paths中存储每个路径对应的路径条件
     global path_conditions
     path_conditions = []
 
@@ -134,6 +137,7 @@ def initGlobalVars():
     global_problematic_pcs = {"money_concurrency_bug": [], "reentrancy_bug": [], "time_dependency_bug": [], "assertion_failure": []}
 
     # store global variables, e.g. storage, balance of all paths
+    #存储全局变量，例如存储，所有路径的平衡
     global all_gs
     all_gs = []
 
@@ -144,6 +148,7 @@ def initGlobalVars():
     no_of_test_cases = 0
 
     # to generate names for symbolic variables
+    # 来为符号变量生成名称
     global gen
     gen = Generator()
 
@@ -171,6 +176,8 @@ def isTesting():
 
 # A simple function to compare the end stack with the expected stack
 # configurations specified in a test file
+#一个简单的函数，用来比较结束堆栈和预期堆栈
+#测试文件中指定的配置
 def compare_stack_unit_test(stack):
     try:
         size = int(result_file.readline())
@@ -460,11 +467,11 @@ def get_init_global_state(path_conditions_and_vars):
     global_state = {"balance" : {}, "pc": 0}
     init_is = init_ia = deposited_value = sender_address = receiver_address = gas_price = origin = currentCoinbase = currentNumber = currentDifficulty = currentGasLimit = callData = None
 
-    if global_params.INPUT_STATE:
+    if global_params.INPUT_STATE:#从state.json中初始化全局变量
         with open('state.json') as f:
             state = json.loads(f.read())
             if state["Is"]["balance"]:
-                init_is = int(state["Is"]["balance"], 16)
+                init_is = int(state["Is"]["balance"], 16)#将"0x..."转为十进制
             if state["Ia"]["balance"]:
                 init_ia = int(state["Ia"]["balance"], 16)
             if state["exec"]["value"]:
@@ -487,7 +494,7 @@ def get_init_global_state(path_conditions_and_vars):
                 currentGasLimit = int(state["env"]["currentGasLimit"], 16)
 
     # for some weird reason these 3 vars are stored in path_conditions insteaad of global_state
-    else:
+    else:#如果没有state.json则初始化位向量
         sender_address = BitVec("Is", 256)
         receiver_address = BitVec("Ia", 256)
         deposited_value = BitVec("Iv", 256)
@@ -564,7 +571,7 @@ def get_init_global_state(path_conditions_and_vars):
 
 def full_sym_exec():
     # executing, starting from beginning
-    path_conditions_and_vars = {"path_condition" : []}
+    path_conditions_and_vars = {"path_condition" : []}#路径条件
     global_state = get_init_global_state(path_conditions_and_vars)
     analysis = init_analysis()
     params = Parameter(path_conditions_and_vars=path_conditions_and_vars, global_state=global_state, analysis=analysis)
