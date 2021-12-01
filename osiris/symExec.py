@@ -286,11 +286,11 @@ def print_cfg():
     f.close()
     log.debug(str(edges))
 
-def mapping_push_instruction(current_line_content, current_ins_address, idx, positions, length):
+def mapping_push_instruction(current_line_content, current_ins_address, idx, positions, length):#映射push汇编指令
     global source_map
 
     while (idx < length):
-        if not positions[idx]:
+        if not positions[idx]:#如果index处为0，则初始化为1
             return idx + 1
         name = positions[idx]['name']
         if name.startswith("tag"):
@@ -338,7 +338,7 @@ def mapping_non_push_instruction(current_line_content, current_ins_address, idx,
 # 3. Store them in vertices
 def collect_vertices(tokens):
     global source_map
-    if source_map:
+    if source_map:#初始化
         idx = 0
         positions = source_map.positions
         length = len(positions)
@@ -354,14 +354,14 @@ def collect_vertices(tokens):
     wait_for_push = False
     is_new_block = False
 
-    for tok_type, tok_string, (srow, scol), _, line_number in tokens:
+    for tok_type, tok_string, (srow, scol), _, line_number in tokens:#处理tokenInfo对象
         if wait_for_push is True:
             push_val = ""
-            for ptok_type, ptok_string, _, _, _ in tokens:
-                if ptok_type == NEWLINE:
+            for ptok_type, ptok_string, _, _, _ in tokens:#
+                if ptok_type == NEWLINE:#含换行符的行
                     is_new_line = True
-                    current_line_content += push_val + ' '
-                    instructions[current_ins_address] = current_line_content
+                    current_line_content += push_val + ' '#初始为空字符串
+                    instructions[current_ins_address] = current_line_content#0索引处为空字符串
                     idx = mapping_push_instruction(current_line_content, current_ins_address, idx, positions, length) if source_map else None
                     log.debug(current_line_content)
                     current_line_content = ""
@@ -410,7 +410,7 @@ def collect_vertices(tokens):
                 end_ins_dict[current_block] = current_ins_address
                 is_new_block = True
             elif tok_string.startswith('PUSH', 0):
-                wait_for_push = True
+                wait_for_push = True#
             is_new_line = False
         if tok_string != "=" and tok_string != ">":
             current_line_content += tok_string + " "
@@ -2459,8 +2459,8 @@ def detect_assertion_failure():
 
     assertions = global_problematic_pcs["assertion_failure"]
     d = {}
-    for asrt in assertions:
-        pos = str(source_map.instr_positions[asrt.pc])
+    for asrt in assertions:#asrt：assertion
+        pos = str(source_map.instr_positions[asrt.pc])#instr_positions：instruction positions
         if pos not in d:
             d[pos] = asrt
     assertions = d.values()
@@ -2913,7 +2913,7 @@ def main(contract, contract_sol, _source_map = None):
 
     try:
         build_cfg_and_analyze()
-        log.debug("Done Symbolic execution")
+        log.debug("Done Symbolic execution")#如果log4j的配置中开启debug级别日志，那么我们就打印输出debug日志，其在输出日志中会被标记为[DEBUG].
     except Exception as e:
         if global_params.UNIT_TEST == 2 or global_params.UNIT_TEST == 3:
             log.exception(e)
