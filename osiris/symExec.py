@@ -197,11 +197,11 @@ def compare_storage_and_gas_unit_test(global_state, analysis):
     test_status = unit_test.compare_with_symExec_result(global_state, analysis)
     exit(test_status)
 
-def change_format():
+def change_format():#格式化反汇编文件
     with open(c_name) as disasm_file:
         file_contents = disasm_file.readlines()#
         i = 0
-        firstLine = file_contents[0].strip('\n')
+        firstLine = file_contents[0].strip('\n')#移除第一行字符串头尾指定的字符（默认为空格或换行符）或字符序列
         for line in file_contents:
             line = line.replace('SELFDESTRUCT', 'SUICIDE')#
             line = line.replace('Missing opcode 0xfd', 'REVERT')
@@ -215,7 +215,7 @@ def change_format():
             except:
                 lineParts[0] = lineParts[0]
             lineParts[-1] = lineParts[-1].strip('\n')
-            try: # adding arrow if last is a number
+            try: # adding arrow if last is a number如果最后是一个数字，添加箭头
                 lastInt = lineParts[-1]
                 if(int(lastInt, 16) or int(lastInt, 16) == 0) and len(lineParts) > 2:
                     lineParts[-1] = "=>"
@@ -236,7 +236,7 @@ def build_cfg_and_analyze():
     change_format()
     with open(c_name, 'r') as disasm_file:
         disasm_file.readline()  # Remove first line
-        tokens = tokenize.generate_tokens(disasm_file.readline)
+        tokens = tokenize.generate_tokens(disasm_file.readline)#以编程方式对文件进行标记的例子，用 generate_tokens() 读取 unicode 字符串而不是字节:
         collect_vertices(tokens)
         construct_bb()
         construct_static_edges()
