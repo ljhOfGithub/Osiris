@@ -126,14 +126,14 @@ def initGlobalVars():
     reentrancy_all_paths = []
 
     global data_flow_all_paths
-    data_flow_all_paths = [[], []] # store all storage addresses
+    data_flow_all_paths = [[], []] # store all storage addresses存储所有内存地址
 
     # store the path condition corresponding to each path in money_flow_all_paths
     #在money_flow_all_paths中存储每个路径对应的路径条件
     global path_conditions
     path_conditions = []
 
-    global global_problematic_pcs
+    global global_problematic_pcs#记录所有出错的pc位置，列表外嵌套字典
     global_problematic_pcs = {"money_concurrency_bug": [], "reentrancy_bug": [], "time_dependency_bug": [], "assertion_failure": []}
 
     # store global variables, e.g. storage, balance of all paths
@@ -148,7 +148,7 @@ def initGlobalVars():
     no_of_test_cases = 0
 
     # to generate names for symbolic variables
-    # 来为符号变量生成名称
+    # 来为符号变量生成符号变量的名称
     global gen
     gen = Generator()
 
@@ -199,11 +199,11 @@ def compare_storage_and_gas_unit_test(global_state, analysis):
 
 def change_format():
     with open(c_name) as disasm_file:
-        file_contents = disasm_file.readlines()
+        file_contents = disasm_file.readlines()#
         i = 0
         firstLine = file_contents[0].strip('\n')
         for line in file_contents:
-            line = line.replace('SELFDESTRUCT', 'SUICIDE')
+            line = line.replace('SELFDESTRUCT', 'SUICIDE')#
             line = line.replace('Missing opcode 0xfd', 'REVERT')
             line = line.replace('Missing opcode 0xfe', 'ASSERTFAIL')
             line = line.replace('Missing opcode', 'INVALID')
@@ -2345,6 +2345,9 @@ def detect_money_concurrency():
 # Detect if there is data concurrency in two different flows.
 # e.g. if a flow modifies a value stored in the storage address and
 # the other one reads that value in its execution
+#检测两个不同的流中是否存在数据并发。
+#例如，如果一个流修改了存储在存储地址中的值
+#另一个在执行中读取该值
 def detect_data_concurrency():
     sload_flows = data_flow_all_paths[0]
     sstore_flows = data_flow_all_paths[1]
