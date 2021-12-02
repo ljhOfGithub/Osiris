@@ -44,18 +44,18 @@ class AstHelper:
             base_contracts = self.get_linearized_base_contracts(node["id"], self.contracts["contractsById"])#linearizedBaseContracts列表
             base_contracts = list(reversed(base_contracts))
             for contract in base_contracts:
-                if "children" in contract:
+                if "children" in contract:#基础合约列表的子节点的变量声明节点
                     for item in contract["children"]:
                         if item["name"] == "VariableDeclaration":
-                            state_vars.append(item)#变量类型和涉及的函数列表
+                            state_vars.append(item)#VariableDeclaration节点有：变量类型和涉及的函数列表，添加VariableDeclaration节点
         return state_vars
 
     def extract_states_definitions(self):
         ret = {}
-        for contract in self.contracts["contractsById"]:
+        for contract in self.contracts["contractsById"]:#contractsById下面是合约节点列表，contract是合约节点的编号（通过print得到的）
             name = self.contracts["contractsById"][contract]["attributes"]["name"]
             source = self.contracts["sourcesByContract"][contract]
-            full_name = source + ":" + name
+            full_name = source + ":" + name#规范完整可用于查找的合约名
             ret[full_name] = self.extract_state_definitions(full_name)#找到合约名才能找
         return ret
 
@@ -69,7 +69,7 @@ class AstHelper:
 
     def extract_func_calls_definitions(self):
         ret = {}
-        for contract in self.contracts["contractsById"]:
+        for contract in self.contracts["contractsById"]:#遍历所有合约节点的FunctionCall节点
             name = self.contracts["contractsById"][contract]["attributes"]["name"]
             source = self.contracts["sourcesByContract"][contract]
             full_name = source + ":" + name
@@ -77,15 +77,15 @@ class AstHelper:
         return ret
 
     def extract_state_variable_names(self, c_name):
-        state_variables = self.extract_states_definitions()[c_name]
+        state_variables = self.extract_states_definitions()[c_name]#合约的
         var_names = []
         for var_name in state_variables:
-            var_names.append(var_name["attributes"]["name"])
+            var_names.append(var_name["attributes"]["name"])#
         return var_names
 
     def extract_func_call_srcs(self, c_name):
-        func_calls = self.extract_func_calls_definitions()[c_name]
+        func_calls = self.extract_func_calls_definitions()[c_name]#指定合约的FunctionCall节点
         func_call_srcs = []
         for func_call in func_calls:
-            func_call_srcs.append(func_call["src"])
+            func_call_srcs.append(func_call["src"])#指定合约的所有FunctionCall节点的source位置，即合约调用其他函数的源码位置
         return func_call_srcs
