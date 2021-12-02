@@ -8,7 +8,7 @@ class Source:
     def __init__(self, filename):
         self.filename = filename
         self.content = self.__load_content()
-        self.line_break_positions = self.__load_line_break_positions()
+        self.line_break_positions = self.__load_line_break_positions()#换行符的字符位置
 
     def __load_content(self):
         with open(self.filename, 'r') as f:
@@ -135,7 +135,7 @@ class SourceMap:
         ret['begin'] = None
         ret['end'] = None
         if pos['begin'] >= 0 and (pos['end'] - pos['begin'] + 1) >= 0:
-            ret['begin'] = self.__convert_from_char_pos(pos['begin'])
+            ret['begin'] = self.__convert_from_char_pos(pos['begin'])#开始的字符位置
             ret['end'] = self.__convert_from_char_pos(pos['end'])
         return ret
 
@@ -147,14 +147,14 @@ class SourceMap:
         col = pos - begin_col
         return {'line': line, 'column': col}
 
-    def __find_lower_bound(self, target, array):
+    def __find_lower_bound(self, target, array):#target是pos，array是换行符字符位置，找指定位置的最近换行符
         start = 0
-        length = len(array)
+        length = len(array)#数组长度
         while length > 0:
-            half = length >> 1
-            middle = start + half
-            if array[middle] <= target:
-                length = length - 1 - half
+            half = length >> 1#长度的一半
+            middle = start + half#中间的数组位置
+            if array[middle] <= target:#数组中间的换行符位置和指定位置比较,如果换行符位置比当前位置小，就将寻找的起点增大，start是最近的换行符在换行符数组中的下标的更大一个自然数
+                length = length - 1 - half#
                 start = middle + 1
             else:
                 length = half
