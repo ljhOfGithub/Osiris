@@ -11,7 +11,10 @@ class AstHelper:
         cmd = "solc --combined-json ast %s" % filename
         out = run_command(cmd)
         out = json.loads(out)
+        #print("out[sources]:"out["sources"])
+        #print("\n")
         return out["sources"]
+
 
     def extract_contract_definitions(self, sourcesList):
         ret = {
@@ -20,13 +23,15 @@ class AstHelper:
             "sourcesByContract": {}
         }
         walker = AstWalker()
-        for k in sourcesList:
+        for k in sourcesList:#需要分析的合约列表，通过命令行参数指定合约文件
             nodes = []
-            walker.walk(sourcesList[k]["AST"], "ContractDefinition", nodes)
+            #print(sourcesList[k]["AST"])
+            walker.walk(sourcesList[k]["AST"], "ContractDefinition", nodes)#sourcesList[k]["AST"]类似u'attributes'的ast
             for node in nodes:
-                ret["contractsById"][node["id"]] = node
-                ret["sourcesByContract"][node["id"]] = k
+                ret["contractsById"][node["id"]] = node#
+                ret["sourcesByContract"][node["id"]] = k#sourcesByContract收集合约在ast树中的节点编号
                 ret["contractsByName"][k + ':' + node["attributes"]["name"]] = node
+        #print(nodes)
         return ret
 
     def get_linearized_base_contracts(self, id, contractsById):
