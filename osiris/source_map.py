@@ -29,7 +29,7 @@ class SourceMap:
         if not SourceMap.parent_filename:
             SourceMap.parent_filename = parent_filename
             SourceMap.position_groups = SourceMap.__load_position_groups()
-            SourceMap.ast_helper = AstHelper(SourceMap.parent_filename)
+            SourceMap.ast_helper = AstHelper(SourceMap.parent_filename)#parent_filename是sourcemap的源文件，即合约sol文件
         self.source = self.__get_source()
         self.positions = self.__get_positions()
         self.instr_positions = {}
