@@ -30,24 +30,24 @@ class AstHelper:
             for node in nodes:
                 ret["contractsById"][node["id"]] = node#
                 ret["sourcesByContract"][node["id"]] = k#sourcesByContract收集合约在ast树中的节点编号
-                ret["contractsByName"][k + ':' + node["attributes"]["name"]] = node
+                ret["contractsByName"][k + ':' + node["attributes"]["name"]] = node#在ret中存储整个合约节点
         #print(nodes)
         return ret
 
-    def get_linearized_base_contracts(self, id, contractsById):
-        return map(lambda id: contractsById[id], contractsById[id]["attributes"]["linearizedBaseContracts"])
+    def get_linearized_base_contracts(self, id, contractsById):#获得linearizedBaseContracts列表与原合约构成的map数据结构
+        return map(lambda id: contractsById[id], contractsById[id]["attributes"]["linearizedBaseContracts"])#
 
-    def extract_state_definitions(self, c_name):
+    def extract_state_definitions(self, c_name):#指定合约名
         node = self.contracts["contractsByName"][c_name]
         state_vars = []
-        if node:
-            base_contracts = self.get_linearized_base_contracts(node["id"], self.contracts["contractsById"])
+        if node:#查到合约
+            base_contracts = self.get_linearized_base_contracts(node["id"], self.contracts["contractsById"])#linearizedBaseContracts列表
             base_contracts = list(reversed(base_contracts))
             for contract in base_contracts:
                 if "children" in contract:
                     for item in contract["children"]:
                         if item["name"] == "VariableDeclaration":
-                            state_vars.append(item)
+                            state_vars.append(item)#变量类型和涉及的函数列表
         return state_vars
 
     def extract_states_definitions(self):
@@ -56,15 +56,15 @@ class AstHelper:
             name = self.contracts["contractsById"][contract]["attributes"]["name"]
             source = self.contracts["sourcesByContract"][contract]
             full_name = source + ":" + name
-            ret[full_name] = self.extract_state_definitions(full_name)
+            ret[full_name] = self.extract_state_definitions(full_name)#找到合约名才能找
         return ret
 
     def extract_func_call_definitions(self, c_name):
-        node = self.contracts["contractsByName"][c_name]
+        node = self.contracts["contractsByName"][c_name]#查找某个节点下面的FunctionCall节点
         walker = AstWalker()
         nodes = []
         if node:
-            walker.walk(node, "FunctionCall", nodes)
+            walker.walk(node, "FunctionCall", nodes)#往nodes中添加FunctionCall节点
         return nodes
 
     def extract_func_calls_definitions(self):
