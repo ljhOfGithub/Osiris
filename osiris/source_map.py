@@ -28,11 +28,11 @@ class SourceMap:
         self.cname = cname
         if not SourceMap.parent_filename:
             SourceMap.parent_filename = parent_filename
-            SourceMap.position_groups = SourceMap.__load_position_groups()
+            SourceMap.position_groups = SourceMap.__load_position_groups()#得到反汇编后的对象
             SourceMap.ast_helper = AstHelper(SourceMap.parent_filename)#parent_filename是sourcemap的源文件，即合约sol文件
         self.source = self.__get_source()
         self.positions = self.__get_positions()
-        self.instr_positions = {}
+        self.instr_positions = {}#指令位置
         self.var_names = self.__get_var_names()
         self.func_call_names = self.__get_func_call_names()
 
@@ -41,14 +41,14 @@ class SourceMap:
             pos = self.instr_positions[pc]
         except:
             return ""
-        begin = pos['begin']
+        begin = pos['begin']#开始的字符位置
         end = pos['end']
-        return self.source.content[begin:end]
+        return self.source.content[begin:end]#源代码
 
     def to_str(self, pcs, bug_name):
         s = ""
         for pc in pcs:
-            source_code = self.find_source_code(pc).split("\n", 1)[0]
+            source_code = self.find_source_code(pc).split("\n", 1)[0]#self.find_source_code(pc).split("\n", 1)：要分析的代码的第一行和剩余的行
             if not source_code:
                 continue
 
@@ -88,15 +88,15 @@ class SourceMap:
         return False
 
     def __get_source(self):
-        fname = self.__get_filename()
+        fname = self.__get_filename()#文件名
         if SourceMap.sources.has_key(fname):
-            return SourceMap.sources[fname]
+            return SourceMap.sources[fname]#返回值是<source_map.Source instance at 0x7f5f2a922098>
         else:
             SourceMap.sources[fname] = Source(fname)
             return SourceMap.sources[fname]
 
     def __get_var_names(self):
-        return SourceMap.ast_helper.extract_state_variable_names(self.cname)
+        return SourceMap.ast_helper.extract_state_variable_names(self.cname)#合约的变量名列表
 
     def __get_func_call_names(self):
         func_call_srcs = SourceMap.ast_helper.extract_func_call_srcs(self.cname)
@@ -106,13 +106,16 @@ class SourceMap:
             start = int(src[0])
             end = start + int(src[1])
             func_call_names.append(self.source.content[start:end])
-        return func_call_names
+        #print(func_call_names)
+        return func_call_names#func_call_names['owner.send(this.balance)', 'dao.withdraw(dao.queryCredit(this))']
+        #具体值func_call_names['dao.donate.value(1)(this)', 'dao.withdraw(1)', 'dao.withdraw(dao.balance)', 'owner.send(this.balance)', 'dao.withdraw(1)']
 
     @classmethod
     def __load_position_groups(cls):
         cmd = "solc --combined-json asm %s" % cls.parent_filename
         out = run_command(cmd)
         out = json.loads(out)
+        #print(out['contracts'])是汇编指令对象
         return out['contracts']
 
     def __get_positions(self):
@@ -125,9 +128,9 @@ class SourceMap:
                 asm = asm['.data']['0']
             except:
                 break
-        return positions
+        return positions#分段分析反汇编代码，先大段再小段
 
-    def __convert_offset_to_line_column(self, pos):
+    def __convert_offset_to_line_column(self, pos):#将偏移量转化为行号列号
         ret = {}
         ret['begin'] = None
         ret['end'] = None
@@ -158,4 +161,4 @@ class SourceMap:
         return start - 1
 
     def __get_filename(self):
-        return self.cname.split(":")[0]
+        return self.cname.split(":")[0]#文件名

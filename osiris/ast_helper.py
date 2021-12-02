@@ -80,7 +80,7 @@ class AstHelper:
         state_variables = self.extract_states_definitions()[c_name]#合约的
         var_names = []
         for var_name in state_variables:
-            var_names.append(var_name["attributes"]["name"])#
+            var_names.append(var_name["attributes"]["name"])#具体值：var_names：[u'dao', u'owner', u'performAttack']
         return var_names
 
     def extract_func_call_srcs(self, c_name):
