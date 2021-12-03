@@ -150,13 +150,13 @@ def check_width_conversion(first, second, target, instruction, current_block, pa
     return False
 
 def addition_overflow_check(augend, addend, analysis, instruction, path_conditions, arithmetic_errors, arithmetic_models, pc):
-    if augend == 0 or addend == 0:
+    if augend == 0 or addend == 0:#加法溢出检查
         return False
 
     if global_params.DEBUG_MODE:
         print("===================================================")
 
-    # Infer information from the augend
+    # Infer information from the augend从加数推断信息
     augend_size = 256
     augend_sign = False
     try:
@@ -173,7 +173,7 @@ def addition_overflow_check(augend, addend, analysis, instruction, path_conditio
     if global_params.DEBUG_MODE:
         print("---> augend ("+str(augend_size)+"): "+str(augend))
 
-    # Infer information from the addend
+    # Infer information from the addend从加数中推断出信息
     addend_size = 256
     addend_sign = False
     try:
@@ -376,13 +376,13 @@ def multiplication_overflow_check(multiplier, multiplicand, analysis, instructio
     return False
 
 def subtraction_underflow_check(minuend, subtrahend, analysis, instruction, path_conditions, arithmetic_errors, arithmetic_models, pc):
-    if subtrahend == 0:
+    if subtrahend == 0:#减法下溢检查
         return False
 
     if global_params.DEBUG_MODE:
         print("===================================================")
 
-    # Infer information from the minuend
+    # Infer information from the minuend从被减数推断信息
     minuend_size = 256
     minuend_sign = False
     try:
@@ -416,7 +416,7 @@ def subtraction_underflow_check(minuend, subtrahend, analysis, instruction, path
     if global_params.DEBUG_MODE:
         print("---> subtrahend ("+str(subtrahend_size)+"): "+str(subtrahend))
 
-    # Infer the size of the larger operand
+    # Infer the size of the larger operand推断较大操作数的大小
     if minuend_size == 256 or subtrahend_size == 256:
         if isReal(minuend) or minuend.__class__.__name__ == "BitVecNumRef" or isReal(subtrahend) or subtrahend.__class__.__name__ == "BitVecNumRef":
             max_size = max(minuend_size, subtrahend_size)
@@ -435,6 +435,7 @@ def subtraction_underflow_check(minuend, subtrahend, analysis, instruction, path
     s.set("timeout", global_params.ARITHMETIC_TIMEOUT)
 
     # Remove certain path conditions if a reentrancy_bug is detected
+    #如果检测到reentrancy_bug，删除特定的路径条件
     if True in analysis["reentrancy_bug"]:
         for path_condition in path_conditions:
             if not (str(minuend) in str(get_vars(path_condition)) and str(subtrahend) in str(get_vars(path_condition))):
@@ -442,13 +443,13 @@ def subtraction_underflow_check(minuend, subtrahend, analysis, instruction, path
     else:
         s.add(path_conditions)
 
-    # Add contraint for unsigned subtraction overflow checking
+    # Add contraint for unsigned subtraction overflow checking#添加无符号减法溢出检查约束
     if minuend_sign == False and subtrahend_sign == False:
         if max_size == 256:
             if simplify(minuend - subtrahend).__class__.__name__ == "BitVecNumRef":
-                    s.add(simplify(minuend - subtrahend) < 0)
+                    s.add(simplify(minuend - subtrahend) < 0)#如果可以用simplify简化被减数和减数，则直接判断是否会下溢，否则用z3
             else:
-                s.add(Not(bvsub_no_underflow(minuend, subtrahend)))
+                s.add(Not(bvsub_no_underflow(minuend, subtrahend)))#用z3确定是否会下溢
         else:
             s.add(minuend - subtrahend < 0)
     # Add contraint for signed subtraction overflow checking
@@ -634,11 +635,11 @@ def bvadd_no_overflow(x, y, signed=False):
     return BoolRef(Z3_mk_bvadd_no_overflow(a.ctx_ref(), a.as_ast(), b.as_ast(), signed))
 
 def bvmul_no_overflow(x, y, signed=False):
-    assert x.ctx_ref()==y.ctx_ref()
-    a, b = z3._coerce_exprs(x, y)
-    return BoolRef(Z3_mk_bvmul_no_overflow(a.ctx_ref(), a.as_ast(), b.as_ast(), signed))
+    assert x.ctx_ref()==y.ctx_ref()#同一个上下文
+    a, b = z3._coerce_exprs(x, y)#统一z3的计算类型
+    return BoolRef(Z3_mk_bvmul_no_overflow(a.ctx_ref(), a.as_ast(), b.as_ast(), signed))#谓词确定位向量乘法不会溢出
 
-def bvsub_no_underflow(x, y, signed=False):
+def bvsub_no_underflow(x, y, signed=False):#
     assert x.ctx_ref()==y.ctx_ref()
     a, b = z3._coerce_exprs(x, y)
-    return BoolRef(Z3_mk_bvsub_no_underflow(a.ctx_ref(), a.as_ast(), b.as_ast(), signed))
+    return BoolRef(Z3_mk_bvsub_no_underflow(a.ctx_ref(), a.as_ast(), b.as_ast(), signed))#谓词确定位向量减法不会溢出
