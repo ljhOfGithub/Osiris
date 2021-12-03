@@ -163,7 +163,7 @@ def initGlobalVars():
     if global_params.REPORT_MODE:
         rfile = open(c_name + '.report', 'w')
 
-def check_unit_test_file():
+def check_unit_test_file():#检查单元测试文件
     if global_params.UNIT_TEST == 1:
         try:
             open('unit_test.json', 'r')
@@ -296,13 +296,13 @@ def mapping_push_instruction(current_line_content, current_ins_address, idx, pos
         if name.startswith("tag"):
             idx += 1
         else:
-            if name.startswith("PUSH"):
+            if name.startswith("PUSH"):#push指令
                 if name == "PUSH":
                     value = positions[idx]['value']
                     instr_value = current_line_content.split(" ")[1]
-                    if int(value, 16) == int(instr_value, 16):
-                        source_map.instr_positions[current_ins_address] = source_map.positions[idx]
-                        idx += 1
+                    if int(value, 16) == int(instr_value, 16):#指令位置字典，指令地址：
+                        source_map.instr_positions[current_ins_address] = source_map.positions[idx]#source_map.instr_positions[current_ins_address]有：begin，end，name（指令名），value（需要push的值）
+                        idx += 1#current_ins_address是push指令在instr_positions字典中的下标
                         break;
                     else:
                         raise Exception("Source map error")
@@ -312,9 +312,9 @@ def mapping_push_instruction(current_line_content, current_ins_address, idx, pos
                     break;
             else:
                 raise Exception("Source map error")
-    return idx
+    return idx#最新的source_map.positions的下标
 
-def mapping_non_push_instruction(current_line_content, current_ins_address, idx, positions, length):
+def mapping_non_push_instruction(current_line_content, current_ins_address, idx, positions, length):#映射非push指令到index
     global source_map
 
     while (idx < length):
@@ -331,7 +331,7 @@ def mapping_non_push_instruction(current_line_content, current_ins_address, idx,
                 break;
             else:
                 raise Exception("Source map error")
-    return idx
+    return idx#最新的source_map.positions的下标
 
 # 1. Parse the disassembled file
 # 2. Then identify each basic block (i.e. one-in, one-out)
@@ -354,7 +354,7 @@ def collect_vertices(tokens):
     wait_for_push = False
     is_new_block = False
 
-    for tok_type, tok_string, (srow, scol), _, line_number in tokens:#处理tokenInfo对象
+    for tok_type, tok_string, (srow, scol), _, line_number in tokens:#处理tokenInfo对象，代币信息
         if wait_for_push is True:
             push_val = ""
             for ptok_type, ptok_string, _, _, _ in tokens:#
