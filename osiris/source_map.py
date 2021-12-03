@@ -52,20 +52,20 @@ class SourceMap:
             if not source_code:
                 continue
 
-            location = self.get_location(pc)
+            location = self.get_location(pc)#行号列号
             if global_params.WEB:
-                s += "%s:%s:%s: %s:<br />" % (self.cname.split(":", 1)[1], location['begin']['line'] + 1, location['begin']['column'] + 1, bug_name)
-                s += "<span style='margin-left: 20px'>%s</span><br />" % source_code
+                s += "%s:%s:%s: %s:<br />" % (self.cname.split(":", 1)[1], location['begin']['line'] + 1, location['begin']['column'] + 1, bug_name)#报告行号列号和bug名
+                s += "<span style='margin-left: 20px'>%s</span><br />" % source_code#s是html的形式
                 s += "<span style='margin-left: 20px'>^</span><br />"
             else:
                 s += "\n%s:%s:%s\n" % (self.cname, location['begin']['line'] + 1, location['begin']['column'] + 1)
-                s += source_code + "\n"
+                s += source_code + "\n"#s是字符串形式
                 s += "^"
         return s
 
     def get_location(self, pc):
-        pos = self.instr_positions[pc]
-        return self.__convert_offset_to_line_column(pos)
+        pos = self.instr_positions[pc]#当前指令的位置对象，有begin，end参数
+        return self.__convert_offset_to_line_column(pos)#将位置转换为行号列号
 
     def reduce_same_position_pcs(self, pcs):
         d = {}
@@ -135,16 +135,16 @@ class SourceMap:
         ret['begin'] = None
         ret['end'] = None
         if pos['begin'] >= 0 and (pos['end'] - pos['begin'] + 1) >= 0:
-            ret['begin'] = self.__convert_from_char_pos(pos['begin'])#开始的字符位置
-            ret['end'] = self.__convert_from_char_pos(pos['end'])
+            ret['begin'] = self.__convert_from_char_pos(pos['begin'])#开始的字符位置的行号列号
+            ret['end'] = self.__convert_from_char_pos(pos['end'])#结束字符位置的行号列号
         return ret
 
     def __convert_from_char_pos(self, pos):
-        line = self.__find_lower_bound(pos, self.source.line_break_positions)
-        if self.source.line_break_positions[line] != pos:
+        line = self.__find_lower_bound(pos, self.source.line_break_positions)#line是最近的换行符的在数组中的下标
+        if self.source.line_break_positions[line] != pos:#寻找对应pos的换行符的在数组中的下标
             line += 1
         begin_col = 0 if line == 0 else self.source.line_break_positions[line - 1] + 1
-        col = pos - begin_col
+        col = pos - begin_col#计算列号
         return {'line': line, 'column': col}
 
     def __find_lower_bound(self, target, array):#target是pos，array是换行符字符位置，找指定位置的最近换行符
