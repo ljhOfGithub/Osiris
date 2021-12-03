@@ -355,7 +355,7 @@ def collect_vertices(tokens):
     is_new_block = False
 
     for tok_type, tok_string, (srow, scol), _, line_number in tokens:#处理tokenInfo对象，代币信息
-        if wait_for_push is True:
+        if wait_for_push is True:#push后面的参数
             push_val = ""
             for ptok_type, ptok_string, _, _, _ in tokens:#
                 if ptok_type == NEWLINE:#含换行符的行
@@ -433,12 +433,12 @@ def construct_bb():
     global edges
     sorted_addresses = sorted(instructions.keys())
     size = len(sorted_addresses)
-    for key in end_ins_dict:
+    for key in end_ins_dict:#end_ins_dict结束指令的开始和结束字符位置
         end_address = end_ins_dict[key]
         block = BasicBlock(key, end_address)
         if key not in instructions:
             continue
-        block.add_instruction(instructions[key])
+        block.add_instruction(instructions[key])#往基本块中添加指令
         i = sorted_addresses.index(key) + 1
         while i < size and sorted_addresses[i] <= end_address:
             block.add_instruction(instructions[sorted_addresses[i]])
@@ -452,16 +452,16 @@ def construct_static_edges():
     add_falls_to()  # these edges are static
 
 
-def add_falls_to():
+def add_falls_to():#构造静态边
     global vertices
     global edges
     key_list = sorted(jump_type.keys())
     length = len(key_list)
-    for i, key in enumerate(key_list):
+    for i, key in enumerate(key_list):#还有后续块的块，不是无条件跳转的块，包含有条件跳转的块，需要设置条件不满足时的跳转，称为静态的边的构造
         if jump_type[key] != "terminal" and jump_type[key] != "unconditional" and i+1 < length:
             target = key_list[i+1]
-            edges[key].append(target)
-            vertices[key].set_falls_to(target)
+            edges[key].append(target)#添加有向边，key->target
+            vertices[key].set_falls_to(target)#默认的跳转
 
 def get_init_global_state(path_conditions_and_vars):
     global_state = {"balance" : {}, "pc": 0}
@@ -653,7 +653,7 @@ def sym_exec_block(params):
     depth += 1
 
     reentrancy_all_paths.append(analysis["reentrancy_bug"])
-    if analysis["money_flow"] not in money_flow_all_paths:
+    if analysis["money_flow"] not in money_flow_all_paths:#并发的提款等金融操作的bug
         global_problematic_pcs["money_concurrency_bug"].append(analysis["money_concurrency_bug"])
         money_flow_all_paths.append(analysis["money_flow"])
         path_conditions.append(path_conditions_and_vars["path_condition"])
