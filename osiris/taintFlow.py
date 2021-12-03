@@ -48,7 +48,7 @@ class TaintObject:
         string += '"taint": "'+str(self.taint)+'"'
         string += '}'
         return string
-    def __eq__(self, _other):
+    def __eq__(self, _other):#判断对象是否相等的运算符重载
         return self.__dict__ == _other.__dict__
 
 class InstructionObject:
@@ -61,7 +61,7 @@ class InstructionObject:
         string += '"opcode":"'+str(self.opcode)+'",'
         string += '"data_in":['
         for i, data in enumerate(self.data_in):
-            if i:
+            if i:#下标一之后加逗号
                 string += ","
             string += '"'+remove_line_break_space(data)+'"'
         string += '],'
@@ -74,8 +74,8 @@ class InstructionObject:
         string += '}'
         return string
     def __eq__(self, _other):
-        if _other.__class__.__name__ == "InstructionObject":
-            return self.__dict__ == _other.__dict__
+        if _other.__class__.__name__ == "InstructionObject":#用反射机制
+            return self.__dict__ == _other.__dict__#判断InstructionObject的属性名和属性值组成的字典是否相同
         else:
             return False
 
@@ -107,10 +107,10 @@ def introduce_taint(instruction, pc, arithmetic_errors):
             taint = []
         taint.append(instruction)#加入存在污点源的指令到taint列表中
     for arithmetic_error in arithmetic_errors:
-        if arithmetic_error["pc"] == pc:
+        if arithmetic_error["pc"] == pc:#运算类的错误
             if not taint:
                 taint = []
-            taint.append(arithmetic_error)
+            taint.append(arithmetic_error)#运算类错误的指令加入taint列表
     if global_params.DEBUG_MODE and taint:
         if taint:
             print "Introducing taint: "
@@ -118,23 +118,24 @@ def introduce_taint(instruction, pc, arithmetic_errors):
                 print " --> "+str(object)
     return taint
 #引擎循环遍历每条执行的指令并检查执行的指令是否为源，然后引擎根据定义的语义通过标记受影响的堆栈值，内存区域或存储位置来引入污点，使用遵循LIFO逻辑的数组结构实现了堆栈。内存存储使用Python字典实现，该字典将内存和存储地址映射到值。
+#模拟实际栈的指令，用污染源和计算错误指令重新建立一个用于污染分析的栈和内存和storage，已经污染传播过的栈，内存，storage
 def propagate_taint(taint, tainted_stack, tainted_memory, tainted_storage, instruction, current_stack, previous_block, current_block, next_blocks, arithmetic_errors, sha3_list, false_positives, strings):
-    # Handle PUSHs
+    # Handle PUSHs处理push
     if "PUSH" in instruction.opcode:
-        tainted_stack.insert(0, TaintObject(current_stack[0], taint))
+        tainted_stack.insert(0, TaintObject(current_stack[0], taint))#取数据current_stack[0]和当前污染的指令列表
 
     # Hanlde DUPs
-    elif "DUP" in instruction.opcode:
+    elif "DUP" in instruction.opcode:#复制指令
         object = tainted_stack[len(instruction.data_in)-1]
         if object.__class__.__name__ == "TaintObject":
-            tainted_stack.insert(0, object)
+            tainted_stack.insert(0, object)#模拟栈的插入,插入当前的污染对象到tainted_stack栈
         else:
             tainted_stack.insert(0, TaintObject(object, taint))
 
     # Handle SWAPs
     elif "SWAP" in instruction.opcode:
         temp = tainted_stack[len(instruction.data_in)-1]
-        tainted_stack[len(instruction.data_in)-1] = tainted_stack[0]
+        tainted_stack[len(instruction.data_in)-1] = tainted_stack[0]#交换
         tainted_stack[0] = temp
 
     # Handle memory
@@ -295,7 +296,7 @@ def propagate_taint(taint, tainted_stack, tainted_memory, tainted_storage, instr
         else:
             tainted_stack.insert(0, TaintObject(current_stack[0], call_taint))
 
-    # Hanlde the rest (stack-based opcodes)
+    # Hanlde the rest (stack-based opcodes)基于栈的剩余指令
     else:
         # IN (pop from stack)
         for i in range(len(instruction.data_in)):
@@ -351,7 +352,7 @@ def propagate_taint(taint, tainted_stack, tainted_memory, tainted_storage, instr
 
                         # Handle strings
                         matches = re.compile('Extract\(255, 5, 31 \+ (.+?)\)').findall(expression)
-                        if len(matches) > 0:
+                        if len(matches) > 0:#删除误判的污染
                             remove_taint(matches, taint, tainted_stack, tainted_memory, tainted_storage, arithmetic_errors, false_positives, strings)
                         matches = re.compile('Not\(Extract\(255, 5, (.+?)\) == 0\)').findall(expression)
                         if len(matches) > 0:
@@ -438,22 +439,22 @@ def propagate_taint(taint, tainted_stack, tainted_memory, tainted_storage, instr
                     false_positives.append(arithmetic_error["pc"])
 
 def check_taint(tainted_stack, tainted_memory, tainted_storage, instruction, sink_flows, arithmetic_errors, previous_block):
-    if instruction.opcode in SINKS:
-        if global_params.DEBUG_MODE:
-            print "Checking taint: "+str(instruction.opcode)
+    if instruction.opcode in SINKS:#关键的程序点sink点
+        if global_params.DEBUG_MODE:#在一些关键的程序点（Sink点）检测关键的操作是否会受到污点信息的影响
+            print "Checking taint: "+str(instruction.opcode)#检查该指令的污点
         validated_errors = []
         if instruction.opcode == "RETURN" or instruction.opcode == "SHA3":
             s0 = tainted_stack[0].data
             s1 = tainted_stack[1].data
-            if not isAllReal(s1, s0):
-                if s0 in tainted_memory:
+            if not isAllReal(s1, s0):#不全是float型
+                if s0 in tainted_memory:#
                     object = tainted_memory[s0]
                     if object.__class__.__name__ == "TaintObject":
                         if object.taint:
-                            sink_flows.append(object.taint)
+                            sink_flows.append(object.taint)#关键的指令流
                             for tainted_object in object.taint:
                                 if not tainted_object.__class__.__name__ == "InstructionObject":
-                                    if not tainted_object in validated_errors:
+                                    if not tainted_object in validated_errors:#不在validated_errors中则添加
                                         validated_errors.append(tainted_object)
             else:
                 for i in range(s1/32):
@@ -475,7 +476,7 @@ def check_taint(tainted_stack, tainted_memory, tainted_storage, instruction, sin
                     for tainted_object in object.taint:
                         if not tainted_object.__class__.__name__ == "InstructionObject":
                             if not tainted_object in validated_errors:
-                                validated_errors.append(tainted_object)
+                                validated_errors.append(tainted_object)#根据污染源的建立，添加从污点分析中分析出来的合约可能的bug，这个工具主要分析的是int类的flow问题
         else:
             for i in range(len(instruction.data_in)):
                 object = tainted_stack[i]
@@ -542,18 +543,18 @@ def remove_taint(matches, taint, tainted_stack, tainted_memory, tainted_storage,
                                         strings.add(var)
                             if not tainted_object in delete_taint:
                                 delete_taint.append(tainted_object)
-            # Remove strings from taint
+            # Remove strings from taint从污染的指令列表中移除可以误判为污染的指令
             for tainted_object in delete_taint:
                 taint.remove(tainted_object)
         for string in strings:
-            # Remove errors caused by strings
+            # Remove errors caused by strings删除由字符串引起的错误
             for arithmetic_error in arithmetic_errors:
                 for data_in in arithmetic_error["instruction"].data_in:
                     if is_expr(data_in):
                         if string in get_vars(data_in):
                             if not arithmetic_error["pc"] in false_positives:
                                 false_positives.append(arithmetic_error["pc"])
-            # Remove strings from tainted stack
+            # Remove strings from tainted stack#从被污染的堆栈中删除字符串
             for tainted_stack_object in tainted_stack:
                 if tainted_stack_object.taint:
                     delete_taint = []
@@ -571,7 +572,7 @@ def remove_taint(matches, taint, tainted_stack, tainted_memory, tainted_storage,
                         tainted_stack_object.taint.remove(tainted_object)
                     if len(tainted_stack_object.taint) == 0:
                         tainted_stack_object.taint = None
-            # Remove strings from tainted memory
+            # Remove strings from tainted memory删除受污染内存中的字符串
             for address in tainted_memory:
                 if tainted_memory[address].taint:
                     delete_taint = []
@@ -589,7 +590,7 @@ def remove_taint(matches, taint, tainted_stack, tainted_memory, tainted_storage,
                         tainted_memory[address].taint.remove(tainted_object)
                     if len(tainted_memory[address].taint) == 0:
                         tainted_memory[address].taint = None
-            # Remove strings from tainted storage
+            # Remove strings from tainted storage#删除受污染存储的字符串
             for address in tainted_storage:
                 if tainted_storage[address].taint:
                     delete_taint = []
@@ -620,16 +621,16 @@ def perform_taint_analysis(previous_block, current_block, next_blocks, pc, opcod
     global strings
 
     try:
-        # Get number of items taken/added to stack by this opcode获取该操作码获取/添加到堆栈的项目数
+        # Get number of items taken/added to stack by this opcode获取该操作码获取/添加到栈的项目数
         items_taken_count = get_opcode(opcode)[1]
         items_added_count = get_opcode(opcode)[2]
 
-        # IN: arguments pop'ed from (previous) stack参数从(以前的)栈中弹出
+        # IN: arguments pop'ed from (previous) stack从(以前的)栈中弹出的参数
         data_in = []
         for i in range(items_taken_count):
             data_in.append(previous_stack[i])
 
-        # OUT: values written to (new) stack OUT:写入(新)堆栈的值
+        # OUT: values written to (new) stack OUT:写入(新)栈的值
         data_out = []
         for i in range(items_added_count):
             data_out.append(current_stack[i])
@@ -645,7 +646,7 @@ def perform_taint_analysis(previous_block, current_block, next_blocks, pc, opcod
 
         #################### TAINT LOGIC ###################
         # Introduce taint
-        taint = introduce_taint(instruction, pc, arithmetic_errors)
+        taint = introduce_taint(instruction, pc, arithmetic_errors)#taint污染源的指令，运算错误的指令列表
         # Check taint
         check_taint(tainted_stack, tainted_memory, tainted_storage, instruction, sink_flows, arithmetic_errors, previous_block)
         # Propagate taint
@@ -656,14 +657,14 @@ def perform_taint_analysis(previous_block, current_block, next_blocks, pc, opcod
             if current_block.get_block_type() == "conditional":
                 left_branch = previous_stack[0]
                 right_branch = pc+1
-                # Preserve the current tainted stack, memory and storage to the left branch
+                # Preserve the current tainted stack, memory and storage to the left branch#保存当前被污染的堆栈，内存和存储到左边的分支
                 if not left_branch in branches:
                     branches[left_branch] = {}
                 branches[left_branch][pc] = {}
                 branches[left_branch][pc]["tainted_stack"] = tainted_stack[:]
                 branches[left_branch][pc]["tainted_memory"] = copy.deepcopy(tainted_memory)
                 branches[left_branch][pc]["tainted_storage"] = copy.deepcopy(tainted_storage)
-                # Preserve the current tainted stack, memory and storage to the right branch
+                # Preserve the current tainted stack, memory and storage to the right branch#保存当前被污染的堆栈，内存和存储到右边的分支
                 if not right_branch in branches:
                     branches[right_branch] = {}
                 branches[right_branch][pc] = {}
@@ -671,8 +672,8 @@ def perform_taint_analysis(previous_block, current_block, next_blocks, pc, opcod
                 branches[right_branch][pc]["tainted_memory"] = copy.deepcopy(tainted_memory)
                 branches[right_branch][pc]["tainted_storage"] = copy.deepcopy(tainted_storage)
             elif current_block.get_block_type() == "terminal":
-                ##### INTRAPROCEDURAL TAINT ANALYSIS #####
-                if global_params.INTERPROCEDURAL_TAINT:
+                ##### INTRAPROCEDURAL TAINT ANALYSIS 过程间污点分析#####
+                if global_params.INTERPROCEDURAL_TAINT:#需要进行过程间分析
                     if len(tainted_storage) > 0:
                         storage_flows.append(copy.deepcopy(tainted_storage))
                     for sink_flow in sink_flows:
