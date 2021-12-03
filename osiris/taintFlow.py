@@ -8,7 +8,7 @@ from opcodes import *
 from intFlow import *
 from vargenerator import *
 
-SOURCES = set(['CALLDATALOAD', 'CALLDATACOPY', 'CALLVALUE', 'SLOAD'])
+SOURCES = set(['CALLDATALOAD', 'CALLDATACOPY', 'CALLVALUE', 'SLOAD'])#污点源
 SINKS   = set(['SSTORE', 'JUMPI', 'RETURN', 'CALL'])
 
 global branches
@@ -105,7 +105,7 @@ def introduce_taint(instruction, pc, arithmetic_errors):
     if instruction.opcode in SOURCES:
         if not taint:
             taint = []
-        taint.append(instruction)
+        taint.append(instruction)#加入存在污点源的指令到taint列表中
     for arithmetic_error in arithmetic_errors:
         if arithmetic_error["pc"] == pc:
             if not taint:
@@ -117,7 +117,7 @@ def introduce_taint(instruction, pc, arithmetic_errors):
             for object in taint:
                 print " --> "+str(object)
     return taint
-
+#引擎循环遍历每条执行的指令并检查执行的指令是否为源，然后引擎根据定义的语义通过标记受影响的堆栈值，内存区域或存储位置来引入污点，使用遵循LIFO逻辑的数组结构实现了堆栈。内存存储使用Python字典实现，该字典将内存和存储地址映射到值。
 def propagate_taint(taint, tainted_stack, tainted_memory, tainted_storage, instruction, current_stack, previous_block, current_block, next_blocks, arithmetic_errors, sha3_list, false_positives, strings):
     # Handle PUSHs
     if "PUSH" in instruction.opcode:
@@ -620,24 +620,24 @@ def perform_taint_analysis(previous_block, current_block, next_blocks, pc, opcod
     global strings
 
     try:
-        # Get number of items taken/added to stack by this opcode
+        # Get number of items taken/added to stack by this opcode获取该操作码获取/添加到堆栈的项目数
         items_taken_count = get_opcode(opcode)[1]
         items_added_count = get_opcode(opcode)[2]
 
-        # IN: arguments pop'ed from (previous) stack
+        # IN: arguments pop'ed from (previous) stack参数从(以前的)栈中弹出
         data_in = []
         for i in range(items_taken_count):
             data_in.append(previous_stack[i])
 
-        # OUT: values written to (new) stack
+        # OUT: values written to (new) stack OUT:写入(新)堆栈的值
         data_out = []
         for i in range(items_added_count):
             data_out.append(current_stack[i])
 
-        # Create an instruction object
+        # Create an instruction object#创建指令对象
         instruction = InstructionObject(opcode, data_in, data_out)
 
-        # Load tainted stack, memory and storage if we are at a branch
+        # Load tainted stack, memory and storage if we are at a branch#加载被污染的堆栈，内存和存储，如果我们在一个分支
         if pc in branches and previous_block.get_end_address() in branches[pc]:
             tainted_stack = branches[pc][previous_block.get_end_address()]["tainted_stack"][:]
             tainted_memory = copy.deepcopy(branches[pc][previous_block.get_end_address()]["tainted_memory"])
