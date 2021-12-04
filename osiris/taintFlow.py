@@ -701,7 +701,7 @@ def perform_taint_analysis(previous_block, current_block, next_blocks, pc, opcod
         traceback.print_exc()
         print "Unexpected error:", sys.exc_info()[0]
 
-def is_input_tainted(instruction):
+def is_input_tainted(instruction):#输入污染
     if instruction.opcode == "ADD" or instruction.opcode == "MUL" or instruction.opcode == "SUB" or instruction.opcode == "SDIV" or instruction.opcode == "AND" or instruction.opcode == "SIGNEXTEND":
         if not (tainted_stack[0].taint == None and tainted_stack[1].taint == None):
             return True

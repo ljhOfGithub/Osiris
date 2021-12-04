@@ -573,13 +573,13 @@ def full_sym_exec():
     # executing, starting from beginning
     path_conditions_and_vars = {"path_condition" : []}#路径条件
     global_state = get_init_global_state(path_conditions_and_vars)#使用初始条件
-    analysis = init_analysis()
+    analysis = init_analysis()#初始化analysis字典
     params = Parameter(path_conditions_and_vars=path_conditions_and_vars, global_state=global_state, analysis=analysis)
     return sym_exec_block(params)
 
 
 # Symbolically executing a block from the start address
-def sym_exec_block(params):
+def sym_exec_block(params):#符号执行一个块
     global solver
     global visited_edges
     global money_flow_all_paths
@@ -607,7 +607,7 @@ def sym_exec_block(params):
 
     Edge = namedtuple("Edge", ["v1", "v2"]) # Factory Function for tuples is used as dictionary key元组的Factory Function用作字典键
     if block < 0:
-        log.debug("UNKNOWN JUMP ADDRESS. TERMINATING THIS PATH")
+        log.debug("UNKNOWN JUMP ADDRESS. TERMINATING THIS PATH")#当前block地址非法
         return ["ERROR"]
 
     if global_params.DEBUG_MODE:
@@ -626,7 +626,7 @@ def sym_exec_block(params):
             print("Overcome a number of loop limit. Terminating this path ...")#克服多个循环限制。终止这条道路
         return stack
 
-    current_gas_used = analysis["gas"]
+    current_gas_used = analysis["gas"]#已经模拟的需要使用的gas
     if current_gas_used > global_params.GAS_LIMIT:
         if global_params.DEBUG_MODE:
             print("Run out of gas. Terminating this path ... ")
@@ -640,7 +640,7 @@ def sym_exec_block(params):
             print("This path results in an exception, possibly an invalid jump address")#如果当前块的地址出错
         return ["ERROR"]
 
-    for instr in block_ins:
+    for instr in block_ins:#遍历块的每一个指令
         if global_params.DEBUG_MODE:
             print(str(global_state["pc"])+" \t "+str(instr))#当前的pc和具体指令
         params.instr = instr
@@ -674,7 +674,7 @@ def sym_exec_block(params):
             if depth > global_params.DEPTH_LIMIT:
                 print "!!! DEPTH LIMIT EXCEEDED !!!"
 
-        total_no_of_paths += 1
+        total_no_of_paths += 1#执行到结束块则路径数+1
 
         if global_params.GENERATE_TEST_CASES:
             try:
@@ -695,7 +695,7 @@ def sym_exec_block(params):
             print "Depth: "+str(depth)
             print ""
 
-        display_analysis(analysis)
+        display_analysis(analysis)#展示money_flow
         if global_params.UNIT_TEST == 1:
             compare_stack_unit_test(stack)
         if global_params.UNIT_TEST == 2 or global_params.UNIT_TEST == 3:
@@ -703,9 +703,9 @@ def sym_exec_block(params):
 
     elif jump_type[block] == "unconditional":  # executing "JUMP"
         successor = vertices[block].get_jump_target()
-        new_params = params.copy()
+        new_params = params.copy()#
         new_params.depth = depth
-        new_params.block = successor
+        new_params.block = successor#当前的块
         new_params.pre_block = block
         new_params.global_state["pc"] = successor
         if source_map:
@@ -714,7 +714,7 @@ def sym_exec_block(params):
                 new_params.func_call = global_state["pc"]
         sym_exec_block(new_params)
     elif jump_type[block] == "falls_to":  # just follow to the next basic block
-        successor = vertices[block].get_falls_to()
+        successor = vertices[block].get_falls_to()#前往jump条件不满足时跳转的块
         new_params = params.copy()
         new_params.depth = depth
         new_params.block = successor
@@ -724,24 +724,24 @@ def sym_exec_block(params):
     elif jump_type[block] == "conditional":  # executing "JUMPI"
         # A choice point, we proceed with depth first search
 
-        branch_expression = vertices[block].get_branch_expression()
+        branch_expression = vertices[block].get_branch_expression()#分支表达式
 
         if global_params.DEBUG_MODE:
             print("Branch expression: " + remove_line_break_space(branch_expression))
 
-        solver.push()  # SET A BOUNDARY FOR SOLVER
+        solver.push()  # SET A BOUNDARY FOR SOLVER#添加分支表达式到z3
         solver.add(branch_expression)
 
         isLeftBranchFeasible = True
 
         try:
             try:
-                if solver.check() == unsat:
+                if solver.check() == unsat:#如果左边分支无解，则isLeftBranchFeasible设置为false
                     isLeftBranchFeasible = False
             except:
                 isLeftBranchFeasible = False
-            if isLeftBranchFeasible:
-                left_branch = vertices[block].get_jump_target()
+            if isLeftBranchFeasible:#如果有解
+                left_branch = vertices[block].get_jump_target()#left_branch是当前块跳转到的块
                 new_params = params.copy()
                 new_params.depth = depth
                 new_params.block = left_branch
@@ -768,7 +768,7 @@ def sym_exec_block(params):
         solver.pop()  # POP SOLVER CONTEXT
 
         solver.push()  # SET A BOUNDARY FOR SOLVER
-        negated_branch_expression = Not(branch_expression)
+        negated_branch_expression = Not(branch_expression)#翻转分支表达式再计算
         solver.add(negated_branch_expression)
 
         if global_params.DEBUG_MODE:
@@ -828,7 +828,7 @@ def sym_exec_ins(params):
     if g_timeout:
         raise Exception("timeout")
 
-    start = params.block
+    start = params.block#设置当前指令执行时的环境
     instr = params.instr
     stack = params.stack
     mem = params.mem
@@ -864,6 +864,9 @@ def sym_exec_ins(params):
     # collecting the analysis result by calling this skeletal function
     # this should be done before symbolically executing the instruction,
     # since SE will modify the stack and mem
+    #通过调用这个骨架函数来收集分析结果
+    #上述步骤应该在符号执行指令之前执行
+    #因为SE（符号执行）将修改堆栈和内存
     update_analysis(analysis, instr_parts[0], stack, mem, global_state, path_conditions_and_vars, solver)
     if instr_parts[0] == "CALL" and analysis["reentrancy_bug"] and analysis["reentrancy_bug"][-1]:
         global_problematic_pcs["reentrancy_bug"].append(global_state["pc"])
@@ -874,7 +877,7 @@ def sym_exec_ins(params):
     #
     #  0s: Stop and Arithmetic Operations
     #
-    if instr_parts[0] == "STOP":
+    if instr_parts[0] == "STOP":#stop和算数操作
         global_state["pc"] = global_state["pc"] + 1
         #return
     elif instr_parts[0] == "ADD":
@@ -884,8 +887,8 @@ def sym_exec_ins(params):
             first = stack.pop(0)
             second = stack.pop(0)
             instruction_object.data_in = [first, second]
-            # Type conversion is needed when they are mismatched
-            if isReal(first) and isSymbolic(second):
+            # Type conversion is needed when they are mismatched转换类型
+            if isReal(first) and isSymbolic(second):#统一转换为bitvec
                 first = BitVecVal(first, 256)
                 computed = first + second
             elif isSymbolic(first) and isReal(second):
@@ -893,12 +896,12 @@ def sym_exec_ins(params):
                 computed = first + second
             else:
                 # both are real and we need to manually modulus with 2 ** 256
-                # if both are symbolic z3 takes care of modulus automatically
-                computed = (first + second) % (2 ** 256)
-            computed = simplify(computed) if is_expr(computed) else computed
-            instruction_object.data_out = [computed]
+                # if both are symbolic z3 takes care of modulus automatically如果两者都是z3规定的符号，则z3会自行转换
+                computed = (first + second) % (2 ** 256)#已经转换完成
+            computed = simplify(computed) if is_expr(computed) else computed#如果是z3则使用simplify否则直接赋值
+            instruction_object.data_out = [computed]#添加计算结果
             stack.insert(0, computed)
-            # Check for addition overflow
+            # Check for addition overflow检查加法溢出
             if is_input_tainted(instruction_object):
                 addition_overflow_check(first, second, analysis, instruction_object, path_conditions_and_vars["path_condition"], arithmetic_errors, arithmetic_models, global_state["pc"] - 1)
         else:
