@@ -355,8 +355,8 @@ def collect_vertices(tokens):
     is_new_block = False
 
     for tok_type, tok_string, (srow, scol), _, line_number in tokens:#处理tokenInfo对象，也是指令对象，包含指令的类型，具体的指令，指令的行号列号
-        if wait_for_push is True:#push后面的参数
-            push_val = ""
+        if wait_for_push is True:#push后面的参数，push指令
+            push_val = ""#定义的指令类型：1是汇编指令NAME，2是立即数NUMBER，4是换行符NEW LINE，5是等于号=
             for ptok_type, ptok_string, _, _, _ in tokens:#
                 if ptok_type == NEWLINE:#含换行符的行
                     is_new_line = True
@@ -367,16 +367,16 @@ def collect_vertices(tokens):
                     current_line_content = ""
                     wait_for_push = False
                     break
-                try:
+                try:#不含换行符的行
                     int(ptok_string, 16)
-                    push_val += ptok_string
+                    push_val += ptok_string#ptok_string具体值例子：PUSH1,push_val是具体的PUSH指令列表
                 except ValueError:
                     pass
             continue
-        elif is_new_line is True and tok_type == NUMBER:  # looking for a line number
+        elif is_new_line is True and tok_type == NUMBER:  # looking for a line number,NUMBER是tokenize库中定义的python的数字转换为字符串后的形式，这里一般是整数的字符串形式
             last_ins_address = current_ins_address
             try:
-                current_ins_address = int(tok_string)
+                current_ins_address = int(tok_string)#tok_string此时是指令的下标（猜测）
             except ValueError:
                 log.critical("ERROR when parsing row %d col %d", srow, scol)
                 quit()
@@ -385,21 +385,21 @@ def collect_vertices(tokens):
                 current_block = current_ins_address
                 is_new_block = False
             continue
-        elif tok_type == NEWLINE:
+        elif tok_type == NEWLINE:#
             is_new_line = True
             log.debug(current_line_content)
-            instructions[current_ins_address] = current_line_content
-            idx = mapping_non_push_instruction(current_line_content, current_ins_address, idx, positions, length) if source_map else None
+            instructions[current_ins_address] = current_line_content#记录指令下标和指令内容到instructions数组中
+            idx = mapping_non_push_instruction(current_line_content, current_ins_address, idx, positions, length) if source_map else None#获得最新的source_map.positions的下标
             current_line_content = ""
             continue
         elif tok_type == NAME:
-            if tok_string == "JUMPDEST":
-                if last_ins_address not in end_ins_dict:
-                    end_ins_dict[current_block] = last_ins_address
-                current_block = current_ins_address
+            if tok_string == "JUMPDEST":#metadata to annotate possible jump destinations，JUMPDEST比较特殊，不需要记录
+                if last_ins_address not in end_ins_dict:#如果JUMPDEST上一个指令不是某个块的最后一个指令则添加到end_ins_dict，作为当前快的最后一个指令
+                    end_ins_dict[current_block] = last_ins_address#记录当前最后一个块的指令
+                current_block = current_ins_address#更新当前检索的块到跳转到的块
                 is_new_block = False
             elif tok_string == "STOP" or tok_string == "RETURN" or tok_string == "SUICIDE" or tok_string == "REVERT" or tok_string == "ASSERTFAIL":
-                jump_type[current_block] = "terminal"
+                jump_type[current_block] = "terminal"#结束块
                 end_ins_dict[current_block] = current_ins_address
             elif tok_string == "JUMP":
                 jump_type[current_block] = "unconditional"
@@ -407,11 +407,11 @@ def collect_vertices(tokens):
                 is_new_block = True
             elif tok_string == "JUMPI":
                 jump_type[current_block] = "conditional"
-                end_ins_dict[current_block] = current_ins_address
+                end_ins_dict[current_block] = current_ins_address#
                 is_new_block = True
             elif tok_string.startswith('PUSH', 0):
                 wait_for_push = True#
-            is_new_line = False
+            is_new_line = False#检索到NAME，不是NEWLINE
         if tok_string != "=" and tok_string != ">":
             current_line_content += tok_string + " "
 
@@ -572,7 +572,7 @@ def get_init_global_state(path_conditions_and_vars):
 def full_sym_exec():
     # executing, starting from beginning
     path_conditions_and_vars = {"path_condition" : []}#路径条件
-    global_state = get_init_global_state(path_conditions_and_vars)
+    global_state = get_init_global_state(path_conditions_and_vars)#使用初始条件
     analysis = init_analysis()
     params = Parameter(path_conditions_and_vars=path_conditions_and_vars, global_state=global_state, analysis=analysis)
     return sym_exec_block(params)
@@ -605,7 +605,7 @@ def sym_exec_block(params):
     calls = params.calls
     func_call = params.func_call
 
-    Edge = namedtuple("Edge", ["v1", "v2"]) # Factory Function for tuples is used as dictionary key
+    Edge = namedtuple("Edge", ["v1", "v2"]) # Factory Function for tuples is used as dictionary key元组的Factory Function用作字典键
     if block < 0:
         log.debug("UNKNOWN JUMP ADDRESS. TERMINATING THIS PATH")
         return ["ERROR"]
@@ -614,16 +614,16 @@ def sym_exec_block(params):
         print("Reach block address " + hex(block))
         print("STACK: " + str(stack))
 
-    current_edge = Edge(pre_block, block)
-    if visited_edges.has_key(current_edge):
-        updated_count_number = visited_edges[current_edge] + 1
+    current_edge = Edge(pre_block, block)#获得当前要执行的边
+    if visited_edges.has_key(current_edge):#如果当前边已经遍历过
+        updated_count_number = visited_edges[current_edge] + 1#则更新当前边的计数
         visited_edges.update({current_edge: updated_count_number})
     else:
-        visited_edges.update({current_edge: 1})
+        visited_edges.update({current_edge: 1})#否则初始化当前边
 
-    if visited_edges[current_edge] > global_params.LOOP_LIMIT:
+    if visited_edges[current_edge] > global_params.LOOP_LIMIT:#如果当前边的执行次数过高则终止
         if global_params.DEBUG_MODE:
-            print("Overcome a number of loop limit. Terminating this path ...")
+            print("Overcome a number of loop limit. Terminating this path ...")#克服多个循环限制。终止这条道路
         return stack
 
     current_gas_used = analysis["gas"]
@@ -634,21 +634,21 @@ def sym_exec_block(params):
 
     # Execute every instruction, one at a time
     try:
-        block_ins = vertices[block].get_instructions()
+        block_ins = vertices[block].get_instructions()#当前边的指令列表
     except KeyError:
         if global_params.DEBUG_MODE:
-            print("This path results in an exception, possibly an invalid jump address")
+            print("This path results in an exception, possibly an invalid jump address")#如果当前块的地址出错
         return ["ERROR"]
 
     for instr in block_ins:
         if global_params.DEBUG_MODE:
-            print(str(global_state["pc"])+" \t "+str(instr))
+            print(str(global_state["pc"])+" \t "+str(instr))#当前的pc和具体指令
         params.instr = instr
         sym_exec_ins(params)
     if global_params.DEBUG_MODE:
         print("")
 
-    # Mark that this basic block in the visited blocks
+    # Mark that this basic block in the visited blocks将这个基本块标记在已访问块中
     visited.append(block)
     depth += 1
 
