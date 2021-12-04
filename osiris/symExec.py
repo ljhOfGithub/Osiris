@@ -765,7 +765,7 @@ def sym_exec_block(params):#符号执行一个块
                 if str(e) == "timeout":
                     raise e
 
-        solver.pop()  # POP SOLVER CONTEXT
+        solver.pop()  # POP SOLVER CONTEXT弹出原来的要求解的表达式
 
         solver.push()  # SET A BOUNDARY FOR SOLVER
         negated_branch_expression = Not(branch_expression)#翻转分支表达式再计算
@@ -783,7 +783,7 @@ def sym_exec_block(params):#符号执行一个块
             except:
                 isRightBranchFeasible = False
             if isRightBranchFeasible:
-                right_branch = vertices[block].get_falls_to()
+                right_branch = vertices[block].get_falls_to()#左分支是满足条件时跳转的，右分支是不满足条件时跳转的
                 new_params = params.copy()
                 new_params.depth = depth
                 new_params.block = right_branch
@@ -797,7 +797,7 @@ def sym_exec_block(params):#符号执行一个块
                 except:
                     pass
                 sym_exec_block(new_params)
-            elif global_params.DEBUG_MODE:
+            elif global_params.DEBUG_MODE:#不可行
                 print("RIGHT BRANCH IS INFEASIBLE")
         except Exception as e:
             log_file.write(str(e))
@@ -1392,9 +1392,9 @@ def sym_exec_ins(params):#ethervm.io的所有单条指令
                 conversion = check_width_conversion(first, second, computed, instruction_object, vertices[params.block], path_conditions_and_vars["path_condition"], arithmetic_errors, arithmetic_models, global_state["pc"] - 1)
                 if conversion:
                     if not computed in width_conversions:
-                        width_conversions.append(computed)
+                        width_conversions.append(computed)#添加涉及宽度拓展的运算的结果去width_conversions中
                 else:
-                    if computed in width_conversions:
+                    if computed in width_conversions:#如果已经在width_conversions
                         for arithmetic_error in arithmetic_errors:
                             if computed == arithmetic_error["instruction"].data_out[0]:
                                 arithmetic_errors.remove(arithmetic_error)
@@ -1523,8 +1523,8 @@ def sym_exec_ins(params):#ethervm.io的所有单条指令
             stack.insert(0, new_var)
         else:
             raise ValueError('STACK underflow')
-    elif instr_parts[0] == "CALLER":  # get caller address
-        # that is directly responsible for this execution
+    elif instr_parts[0] == "CALLER":  # get caller address caller调用函数并执行
+        # that is directly responsible for this execution#直接负责此执行
         global_state["pc"] = global_state["pc"] + 1
         stack.insert(0, global_state["sender_address"])
     elif instr_parts[0] == "ORIGIN":  # get execution origination address
@@ -1571,7 +1571,7 @@ def sym_exec_ins(params):#ethervm.io的所有单条指令
             path_conditions_and_vars[new_var_name] = new_var
         stack.insert(0, new_var)
         initialize_var(new_var, type_information)
-    elif instr_parts[0] == "CALLDATACOPY":  # Copy input data to memory
+    elif instr_parts[0] == "CALLDATACOPY":  # Copy input data to memory模拟内存
         #  TODO: Don't know how to simulate this yet
         if len(stack) > 2:
             global_state["pc"] = global_state["pc"] + 1
@@ -2498,12 +2498,12 @@ def detect_assertion_failure():
     s = "\t  Assertion failure: \t True" + s if s else "\t  Assertion failure: \t False"
     log.info(s)
 
-def validate_width_conversions():
+def validate_width_conversions():#验证宽度转换
     false_positives = []
     appended = []
     removed = []
     for arithmetic_error in arithmetic_errors:
-        if arithmetic_error["instruction"].opcode == "SIGNEXTEND" or arithmetic_error["instruction"].opcode == "AND":
+        if arithmetic_error["instruction"].opcode == "SIGNEXTEND" or arithmetic_error["instruction"].opcode == "AND":#有符号的拓展，和运算
             for width_conversion in width_conversions:
                 if is_expr(arithmetic_error["instruction"].data_out[0]) and is_expr(width_conversion):
                     if len(get_vars(arithmetic_error["instruction"].data_out[0])) == 1 and len(get_vars(width_conversion)) == 1:
@@ -2519,7 +2519,7 @@ def validate_width_conversions():
     for false_positive in false_positives:
         arithmetic_errors.remove(false_positive)
 
-def detect_arithmetic_errors():
+def detect_arithmetic_errors():#检查运算错误
     global source_map
     global results
 
