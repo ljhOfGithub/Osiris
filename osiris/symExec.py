@@ -237,10 +237,10 @@ def build_cfg_and_analyze():
     with open(c_name, 'r') as disasm_file:
         disasm_file.readline()  # Remove first line
         tokens = tokenize.generate_tokens(disasm_file.readline)#以编程方式对文件进行标记的例子，用 generate_tokens() 读取 unicode 字符串而不是字节:
-        collect_vertices(tokens)
-        construct_bb()
-        construct_static_edges()
-        full_sym_exec()  # jump targets are constructed on the fly
+        collect_vertices(tokens)#根据指令构造节点
+        construct_bb()#构造基本块
+        construct_static_edges()#构造基本块的静态边
+        full_sym_exec()  # jump targets are constructed on the fly跳跃目标是在飞行中构造的
         if global_params.CFG:
             print_cfg()
 
@@ -354,7 +354,7 @@ def collect_vertices(tokens):
     wait_for_push = False
     is_new_block = False
 
-    for tok_type, tok_string, (srow, scol), _, line_number in tokens:#处理tokenInfo对象，代币信息
+    for tok_type, tok_string, (srow, scol), _, line_number in tokens:#处理tokenInfo对象，也是指令对象，包含指令的类型，具体的指令，指令的行号列号
         if wait_for_push is True:#push后面的参数
             push_val = ""
             for ptok_type, ptok_string, _, _, _ in tokens:#
@@ -433,7 +433,7 @@ def construct_bb():
     global edges
     sorted_addresses = sorted(instructions.keys())
     size = len(sorted_addresses)
-    for key in end_ins_dict:#end_ins_dict结束指令的开始和结束字符位置
+    for key in end_ins_dict:#end_ins_dict某种指令的开始和结束字符位置，key是开始字符位置，end_address是结束字符位置
         end_address = end_ins_dict[key]
         block = BasicBlock(key, end_address)
         if key not in instructions:
@@ -443,9 +443,9 @@ def construct_bb():
         while i < size and sorted_addresses[i] <= end_address:
             block.add_instruction(instructions[sorted_addresses[i]])
             i += 1
-        block.set_block_type(jump_type[key])
-        vertices[key] = block
-        edges[key] = []
+        block.set_block_type(jump_type[key])#jump_type中，{块的开始位置：块的跳转类型}
+        vertices[key] = block#vertices中，{块的开始位置：快对象}
+        edges[key] = []#构造以该块为起点的边数组，{块的开始位置：块能跳转到的块的开始位置}
 
 
 def construct_static_edges():
