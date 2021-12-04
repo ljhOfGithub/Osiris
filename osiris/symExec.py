@@ -816,7 +816,7 @@ def sym_exec_block(params):#符号执行一个块
         raise Exception('Unknown Jump-Type')
 
 # Symbolically executing an instruction
-def sym_exec_ins(params):
+def sym_exec_ins(params):#ethervm.io的所有单条指令
     global visited_pcs
     global solver
     global vertices
@@ -829,7 +829,7 @@ def sym_exec_ins(params):
         raise Exception("timeout")
 
     start = params.block#设置当前指令执行时的环境
-    instr = params.instr
+    instr = params.instr#取出指令进行遍历
     stack = params.stack
     mem = params.mem
     memory = params.memory
@@ -843,7 +843,7 @@ def sym_exec_ins(params):
 
     visited_pcs.add(global_state["pc"])
 
-    instr_parts = str.split(instr, ' ')
+    instr_parts = str.split(instr, ' ')#
 
     previous_stack = copy_all(stack)[0]
     previous_pc = global_state["pc"]
@@ -900,7 +900,7 @@ def sym_exec_ins(params):
                 computed = (first + second) % (2 ** 256)#已经转换完成
             computed = simplify(computed) if is_expr(computed) else computed#如果是z3则使用simplify否则直接赋值
             instruction_object.data_out = [computed]#添加计算结果
-            stack.insert(0, computed)
+            stack.insert(0, computed)#更新该条指令运行后的栈状态
             # Check for addition overflow检查加法溢出
             if is_input_tainted(instruction_object):
                 addition_overflow_check(first, second, analysis, instruction_object, path_conditions_and_vars["path_condition"], arithmetic_errors, arithmetic_models, global_state["pc"] - 1)
@@ -1068,7 +1068,7 @@ def sym_exec_ins(params):
                 modulo_check(second, instruction_object, path_conditions_and_vars["path_condition"], arithmetic_errors, arithmetic_models, global_state["pc"] - 1)
         else:
             raise ValueError('STACK underflow')
-    elif instr_parts[0] == "SMOD":
+    elif instr_parts[0] == "SMOD":#singed modulus有符号的取模
         if len(stack) > 1:
             global_state["pc"] = global_state["pc"] + 1
             instruction_object = InstructionObject(instr_parts[0], [], [])
@@ -1089,7 +1089,7 @@ def sym_exec_ins(params):
                 solver.push()
                 solver.add(Not(second == 0))
                 if check_solver(solver) == unsat:
-                    # it is provable that second is indeed equal to zero
+                    # it is provable that second is indeed equal to zero 可以证明第二个确实等于零
                     computed = 0
                 else:
                     solver.push()
@@ -1248,7 +1248,7 @@ def sym_exec_ins(params):
         else:
             raise ValueError('STACK underflow')
     #
-    #  10s: Comparison and Bitwise Logic Operations
+    #  10s: Comparison and Bitwise Logic Operations,10是ethervm.io的值
     #
     elif instr_parts[0] == "LT":
         if len(stack) > 1:
