@@ -37,9 +37,9 @@ class AstHelper:
     def get_linearized_base_contracts(self, id, contractsById):#获得linearizedBaseContracts列表与原合约构成的map数据结构
         return map(lambda id: contractsById[id], contractsById[id]["attributes"]["linearizedBaseContracts"])#
 
-    def extract_state_definitions(self, c_name):#指定合约名
-        node = self.contracts["contractsByName"][c_name]
-        state_vars = []
+    def extract_state_definitions(self, c_name):#指定合约名，举例cname：u'datasets/SimpleDAO/SimpleDAO_0.4.19.sol:Mallory2'
+        node = self.contracts["contractsByName"][c_name]#长度为5的字典，包括attributes，src，children长度是7，name是ContractDefinition，id是204
+        state_vars = []#
         if node:#查到合约
             base_contracts = self.get_linearized_base_contracts(node["id"], self.contracts["contractsById"])#linearizedBaseContracts列表
             base_contracts = list(reversed(base_contracts))
@@ -53,9 +53,9 @@ class AstHelper:
     def extract_states_definitions(self):#self:<ast_helper.AstHelper instance at 0x7eff52c19908>
         ret = {}#self.contracts["contractsById"]是字典，self.contracts["contractsById"].keys()：[204, 68, 117]是合约的id
         for contract in self.contracts["contractsById"]:#contractsById下面是合约节点列表，contract是合约节点的编号（通过print得到的）
-            name = self.contracts["contractsById"][contract]["attributes"]["name"]#204对应Mallory2，68对应SimpleDAO，117对应Mallory
+            name = self.contracts["contractsById"][contract]["attributes"]["name"]#204对应Mallory2，68对应SimpleDAO，117对应Mallory，合约名
             source = self.contracts["sourcesByContract"][contract]#三个合约id对应同一个solidity文件
-            full_name = source + ":" + name#规范完整可用于查找的合约名
+            full_name = source + ":" + name#规范完整可用于查找的合约名，全名是solidity文件名加合约名
             ret[full_name] = self.extract_state_definitions(full_name)#找到合约名才能找
         return ret
 
