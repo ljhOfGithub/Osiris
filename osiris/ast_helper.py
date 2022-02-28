@@ -54,7 +54,7 @@ class AstHelper:
         ret = {}#self.contracts["contractsById"]是字典，self.contracts["contractsById"].keys()：[204, 68, 117]是合约的id
         for contract in self.contracts["contractsById"]:#contractsById下面是合约节点列表，contract是合约节点的编号（通过print得到的）
             name = self.contracts["contractsById"][contract]["attributes"]["name"]
-            source = self.contracts["sourcesByContract"][contract]
+            source = self.contracts["sourcesByContract"][contract]#三个合约id对应同一个solidity文件
             full_name = source + ":" + name#规范完整可用于查找的合约名
             ret[full_name] = self.extract_state_definitions(full_name)#找到合约名才能找
         return ret
