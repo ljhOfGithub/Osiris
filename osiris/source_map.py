@@ -98,15 +98,15 @@ class SourceMap:
     def __get_var_names(self):#self.cname:datasets/SimpleDAO/SimpleDAO_0.4.19.sol:Mallory
         return SourceMap.ast_helper.extract_state_variable_names(self.cname)#合约的变量名列表，[u'dao', u'owner']
 
-    def __get_func_call_names(self):
+    def __get_func_call_names(self):#func_call_srcs：[u'706:24:0', u'787:35:0']
         func_call_srcs = SourceMap.ast_helper.extract_func_call_srcs(self.cname)#self.cname:'datasets/SimpleDAO/SimpleDAO_0.4.19.sol:Mallory'
         func_call_names = []
         for src in func_call_srcs:
-            src = src.split(":")
-            start = int(src[0])
-            end = start + int(src[1])
-            func_call_names.append(self.source.content[start:end])
-        #print(func_call_names)
+            src = src.split(":")#[u'706', u'24', u'0']
+            start = int(src[0])#706
+            end = start + int(src[1])#730
+            func_call_names.append(self.source.content[start:end])#获得调用的函数的签名，owner.send(this.balance)
+        #print(func_call_names)最终['owner.send(this.balance)', 'dao.withdraw(dao.queryCredit(this))']
         return func_call_names#func_call_names['owner.send(this.balance)', 'dao.withdraw(dao.queryCredit(this))']
         #具体值func_call_names['dao.donate.value(1)(this)', 'dao.withdraw(1)', 'dao.withdraw(dao.balance)', 'owner.send(this.balance)', 'dao.withdraw(1)']
 

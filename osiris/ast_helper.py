@@ -99,4 +99,4 @@ class AstHelper:
         func_call_srcs = []#合约调用的位置列表，三元组，Mallory调用send函数，withdraw函数
         for func_call in func_calls:
             func_call_srcs.append(func_call["src"])#指定合约的所有FunctionCall节点的source位置，即合约调用其他函数的源码位置
-        return func_call_srcs
+        return func_call_srcs#[u'706:24:0', u'787:35:0']
