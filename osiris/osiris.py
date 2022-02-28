@@ -59,7 +59,7 @@ def removeSwarmHash(evm):
     '''
     TODO Purpose?
     '''
-    evm_without_hash = re.sub(r"a165627a7a72305820\S{64}0029$", "", evm)
+    evm_without_hash = re.sub(r"a165627a7a72305820\S{64}0029$", "", evm)#替换字符串中的匹配项，a165627a7a72305820 dacdbd4746bc93ee5994b672048cef1839ae3af1c4a2382c7b0c5a2f7f37292b 0029中间一段被删除
     return evm_without_hash
 
 def extract_bin_str(s):
@@ -143,7 +143,7 @@ def analyze(processed_evm_file, disasm_file, source_map = None):
 
     # Run symExec
     if source_map is not None:
-        symExec.main(disasm_file, args.source, source_map)#
+        symExec.main(disasm_file, args.source, source_map)#需要等待执行
     else:
         symExec.main(disasm_file, args.source)
 
@@ -288,7 +288,7 @@ def main():
 
         remove_temporary_file(disasm_file)#删除evm.disasm文件
         remove_temporary_file(processed_evm_file)#删除evm文件
-        remove_temporary_file(disasm_file + '.log')
+        remove_temporary_file(disasm_file + '.log')#删除log文件
 
         if global_params.UNIT_TEST == 2 or global_params.UNIT_TEST == 3:
             exit_code = os.WEXITSTATUS(cmd)
@@ -296,26 +296,26 @@ def main():
                 exit(exit_code)
     else:
         # Compile contracts using solc
-        contracts = compileContracts(args.source)#编译solidity文件
+        contracts = compileContracts(args.source)#编译solidity文件，contracts是list，元素是tuple，tuple的第一个是'solidity文件名：合约名'的字符串
 
         # Analyze each contract
-        for cname, bin_str in contracts:
+        for cname, bin_str in contracts:#二元tuple列表的遍历
             print("")
             logging.info("Contract %s:", cname)
-            processed_evm_file = cname + '.evm'
-            disasm_file = cname + '.evm.disasm'
+            processed_evm_file = cname + '.evm'#cname：'datasets/SimpleDAO/SimpleDAO_0.4.19.sol:Mallory'
+            disasm_file = cname + '.evm.disasm'#cname：'datasets/SimpleDAO/SimpleDAO_0.4.19.sol:Mallory'
 
             with open(processed_evm_file, 'w') as of:
-                of.write(removeSwarmHash(bin_str))
+                of.write(removeSwarmHash(bin_str))#去除swarm hash后存储
 
-            analyze(processed_evm_file, disasm_file, SourceMap(cname, args.source))
-
+            analyze(processed_evm_file, disasm_file, SourceMap(cname, args.source))#cname：'datasets/SimpleDAO/SimpleDAO_0.4.19.sol:Mallory'
+            #需要等待执行
             remove_temporary_file(processed_evm_file)
             remove_temporary_file(disasm_file)
             remove_temporary_file(disasm_file + '.log')
 
             if args.evm:
-                with open(processed_evm_file, 'w') as of:
+                with open(processed_evm_file, 'w') as of:#如果需要，可以不去除swarm hash
                     of.write(bin_str)
 
         if global_params.STORE_RESULT:
