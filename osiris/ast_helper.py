@@ -39,7 +39,17 @@ class AstHelper:
 
     def extract_state_definitions(self, c_name):#指定合约名，举例cname：u'datasets/SimpleDAO/SimpleDAO_0.4.19.sol:Mallory2'
         node = self.contracts["contractsByName"][c_name]#长度为5的字典，包括attributes，src，children长度是7，name是ContractDefinition，id是204
-        state_vars = []#
+        state_vars = []#self.contracts["contractsByName"][c_name]['children'][1]如下：
+        attributes
+# {u'storageLocation': u'default', u'constant': False, u'name': u'owner', u'stateVariable': True, u'value': None, u'visibility': u'internal', u'scope': 204, u'type': u'address'}
+# src
+# 877:13:0
+# children
+# [{u'attributes': {u'type': u'address', u'name': u'address'}, u'src': u'877:7:0', u'id': 120, u'name': u'ElementaryTypeName'}]
+# name
+# VariableDeclaration
+# id
+# 121
         if node:#查到合约
             base_contracts = self.get_linearized_base_contracts(node["id"], self.contracts["contractsById"])#linearizedBaseContracts列表
             base_contracts = list(reversed(base_contracts))
