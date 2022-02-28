@@ -72,7 +72,7 @@ class AstHelper:
 
     def extract_func_call_definitions(self, c_name):#c_name:u'datasets/SimpleDAO/SimpleDAO_0.4.19.sol:Mallory2'
         node = self.contracts["contractsByName"][c_name]#查找某个节点下面的FunctionCall节点
-        walker = AstWalker()
+        walker = AstWalker()#类，不是方法，<ast_walker.AstWalker instance at 0x7eff52a9e710>
         nodes = []
         if node:
             walker.walk(node, "FunctionCall", nodes)#往nodes中添加FunctionCall节点
