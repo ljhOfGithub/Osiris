@@ -53,7 +53,7 @@ class AstHelper:
     def extract_states_definitions(self):#self:<ast_helper.AstHelper instance at 0x7eff52c19908>
         ret = {}#self.contracts["contractsById"]是字典，self.contracts["contractsById"].keys()：[204, 68, 117]是合约的id
         for contract in self.contracts["contractsById"]:#contractsById下面是合约节点列表，contract是合约节点的编号（通过print得到的）
-            name = self.contracts["contractsById"][contract]["attributes"]["name"]
+            name = self.contracts["contractsById"][contract]["attributes"]["name"]#204对应Mallory2，68对应SimpleDAO，117对应Mallory
             source = self.contracts["sourcesByContract"][contract]#三个合约id对应同一个solidity文件
             full_name = source + ":" + name#规范完整可用于查找的合约名
             ret[full_name] = self.extract_state_definitions(full_name)#找到合约名才能找
