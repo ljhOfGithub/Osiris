@@ -26,7 +26,7 @@ class SourceMap:
 
     def __init__(self, cname, parent_filename):
         self.cname = cname
-        if not SourceMap.parent_filename:
+        if not SourceMap.parent_filename:#SourceMap.parent_filename='datasets/SimpleDAO/SimpleDAO_0.4.19.sol'
             SourceMap.parent_filename = parent_filename
             SourceMap.position_groups = SourceMap.__load_position_groups()#得到反汇编后的对象
             SourceMap.ast_helper = AstHelper(SourceMap.parent_filename)#parent_filename是sourcemap的源文件，即合约sol文件
@@ -160,5 +160,5 @@ class SourceMap:
                 length = half
         return start - 1
 
-    def __get_filename(self):
-        return self.cname.split(":")[0]#文件名
+    def __get_filename(self):#self.cname=datasets/SimpleDAO/SimpleDAO_0.4.19.sol:Mallory
+        return self.cname.split(":")[0]#文件名,['datasets/SimpleDAO/SimpleDAO_0.4.19.sol', 'Mallory']
