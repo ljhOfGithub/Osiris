@@ -70,7 +70,7 @@ class AstHelper:
             ret[full_name] = self.extract_state_definitions(full_name)#找到合约名才能找，构造合约全名和合约变量声明节点的字典
         return ret
 
-    def extract_func_call_definitions(self, c_name):
+    def extract_func_call_definitions(self, c_name):#c_name:u'datasets/SimpleDAO/SimpleDAO_0.4.19.sol:Mallory2'
         node = self.contracts["contractsByName"][c_name]#查找某个节点下面的FunctionCall节点
         walker = AstWalker()
         nodes = []
@@ -81,9 +81,9 @@ class AstHelper:
     def extract_func_calls_definitions(self):
         ret = {}
         for contract in self.contracts["contractsById"]:#遍历所有合约节点的FunctionCall节点,self.contracts["contractsById"]长3，self.contracts["contractsById"].keys()：[204, 68, 117]
-            name = self.contracts["contractsById"][contract]["attributes"]["name"]
-            source = self.contracts["sourcesByContract"][contract]
-            full_name = source + ":" + name
+            name = self.contracts["contractsById"][contract]["attributes"]["name"]#u'Mallory2'
+            source = self.contracts["sourcesByContract"][contract]#u'datasets/SimpleDAO/SimpleDAO_0.4.19.sol'
+            full_name = source + ":" + name#建立合约全名和合约函数调用的定义
             ret[full_name] = self.extract_func_call_definitions(full_name)
         return ret
 
