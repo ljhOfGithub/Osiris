@@ -36,11 +36,13 @@ class AstHelper:
 
     def get_linearized_base_contracts(self, id, contractsById):#获得linearizedBaseContracts列表与原合约构成的map数据结构
         return map(lambda id: contractsById[id], contractsById[id]["attributes"]["linearizedBaseContracts"])#
-
+    #id是204
     def extract_state_definitions(self, c_name):#指定合约名，举例cname：u'datasets/SimpleDAO/SimpleDAO_0.4.19.sol:Mallory2'
-        node = self.contracts["contractsByName"][c_name]#长度为5的字典，包括attributes，src，children长度是7，name是ContractDefinition，id是204
-        state_vars = []#self.contracts["contractsByName"][c_name]['children'][1]如下：
-        attributes
+        node = self.contracts["contractsByName"][c_name]#长度为5的字典，包括attributes如下，src是831:569:0，children长度是7，name是ContractDefinition，id是204
+        #attributes：{u'contractDependencies': [None], u'linearizedBaseContracts': [204], u'name': u'Mallory2', u'documentation': None, u'contractKind': u'contract', u'scope': 205, u'fullyImplemented': True, u'baseContracts': [None]}
+        state_vars = []
+#self.contracts["contractsByName"][c_name]['children'][1]如下：
+# attributes
 # {u'storageLocation': u'default', u'constant': False, u'name': u'owner', u'stateVariable': True, u'value': None, u'visibility': u'internal', u'scope': 204, u'type': u'address'}
 # src
 # 877:13:0
