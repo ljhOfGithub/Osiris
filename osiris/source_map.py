@@ -26,7 +26,7 @@ class SourceMap:
 
     def __init__(self, cname, parent_filename):
         self.cname = cname
-        if not SourceMap.parent_filename:#SourceMap.parent_filename='datasets/SimpleDAO/SimpleDAO_0.4.19.sol'
+        if not SourceMap.parent_filename:
             SourceMap.parent_filename = parent_filename
             SourceMap.position_groups = SourceMap.__load_position_groups()#得到反汇编后的对象
             SourceMap.ast_helper = AstHelper(SourceMap.parent_filename)#parent_filename是sourcemap的源文件，即合约sol文件
@@ -88,14 +88,14 @@ class SourceMap:
         return False
 
     def __get_source(self):
-        fname = self.__get_filename()#文件名
-        if SourceMap.sources.has_key(fname):
+        fname = self.__get_filename()#文件名,fname=datasets/SimpleDAO/SimpleDAO_0.4.19.sol
+        if SourceMap.sources.has_key(fname):#SourceMap.sources:{'datasets/SimpleDAO/SimpleDAO_0.4.19.sol': <source_map.Source instance at 0x7eff52a68170>}，一个文件字符串和sourcemap对象的字典
             return SourceMap.sources[fname]#返回值是<source_map.Source instance at 0x7f5f2a922098>
         else:
             SourceMap.sources[fname] = Source(fname)
             return SourceMap.sources[fname]
 
-    def __get_var_names(self):
+    def __get_var_names(self):#self.cname:datasets/SimpleDAO/SimpleDAO_0.4.19.sol:Mallory
         return SourceMap.ast_helper.extract_state_variable_names(self.cname)#合约的变量名列表
 
     def __get_func_call_names(self):
@@ -119,12 +119,12 @@ class SourceMap:
         return out['contracts']
 
     def __get_positions(self):
-        asm = SourceMap.position_groups[self.cname]['asm']['.data']['0']
-        positions = asm['.code']
+        asm = SourceMap.position_groups[self.cname]['asm']['.data']['0']#self.cname：'datasets/SimpleDAO/SimpleDAO_0.4.19.sol:Mallory'
+        positions = asm['.code']#positions是list，asm是len为2的dict
         while(True):
             try:
                 positions.append(None)
-                positions += asm['.data']['0']['.code']
+                positions += asm['.data']['0']['.code']#没有data则会报错，跳出循环，返回分析好的evm汇编指令列表（positions）
                 asm = asm['.data']['0']
             except:
                 break
@@ -160,5 +160,5 @@ class SourceMap:
                 length = half
         return start - 1
 
-    def __get_filename(self):#self.cname=datasets/SimpleDAO/SimpleDAO_0.4.19.sol:Mallory
-        return self.cname.split(":")[0]#文件名,['datasets/SimpleDAO/SimpleDAO_0.4.19.sol', 'Mallory']
+    def __get_filename(self):
+        return self.cname.split(":")[0]#文件名

@@ -50,8 +50,8 @@ class AstHelper:
                             state_vars.append(item)#VariableDeclaration节点有：变量类型和涉及的函数列表，添加VariableDeclaration节点
         return state_vars
 
-    def extract_states_definitions(self):
-        ret = {}
+    def extract_states_definitions(self):#self:<ast_helper.AstHelper instance at 0x7eff52c19908>
+        ret = {}#self.contracts["contractsById"]是字典，self.contracts["contractsById"].keys()：[204, 68, 117]是合约的id
         for contract in self.contracts["contractsById"]:#contractsById下面是合约节点列表，contract是合约节点的编号（通过print得到的）
             name = self.contracts["contractsById"][contract]["attributes"]["name"]
             source = self.contracts["sourcesByContract"][contract]
