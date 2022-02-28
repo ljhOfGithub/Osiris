@@ -53,10 +53,10 @@ class AstHelper:
 # 121
         if node:#
             base_contracts = self.get_linearized_base_contracts(node["id"], self.contracts["contractsById"])#根据某个合约找到linearizedBaseContracts列表
-            base_contracts = list(reversed(base_contracts))
-            for contract in base_contracts:
+            base_contracts = list(reversed(base_contracts))#此例中只有一个合约
+            for contract in base_contracts:#contract长度是5，是字典
                 if "children" in contract:#基础合约列表的子节点的变量声明节点
-                    for item in contract["children"]:
+                    for item in contract["children"]:#此例中没有children
                         if item["name"] == "VariableDeclaration":
                             state_vars.append(item)#VariableDeclaration节点有：变量类型和涉及的函数列表，添加VariableDeclaration节点
         return state_vars
@@ -67,7 +67,7 @@ class AstHelper:
             name = self.contracts["contractsById"][contract]["attributes"]["name"]#204对应Mallory2，68对应SimpleDAO，117对应Mallory，合约名
             source = self.contracts["sourcesByContract"][contract]#三个合约id对应同一个solidity文件
             full_name = source + ":" + name#规范完整可用于查找的合约名，全名是solidity文件名加合约名
-            ret[full_name] = self.extract_state_definitions(full_name)#找到合约名才能找
+            ret[full_name] = self.extract_state_definitions(full_name)#找到合约名才能找，构造合约全名和合约变量声明节点的字典
         return ret
 
     def extract_func_call_definitions(self, c_name):
@@ -80,21 +80,21 @@ class AstHelper:
 
     def extract_func_calls_definitions(self):
         ret = {}
-        for contract in self.contracts["contractsById"]:#遍历所有合约节点的FunctionCall节点
+        for contract in self.contracts["contractsById"]:#遍历所有合约节点的FunctionCall节点,self.contracts["contractsById"]长3，self.contracts["contractsById"].keys()：[204, 68, 117]
             name = self.contracts["contractsById"][contract]["attributes"]["name"]
             source = self.contracts["sourcesByContract"][contract]
             full_name = source + ":" + name
             ret[full_name] = self.extract_func_call_definitions(full_name)
         return ret
 
-    def extract_state_variable_names(self, c_name):
-        state_variables = self.extract_states_definitions()[c_name]#合约的
+    def extract_state_variable_names(self, c_name):#c_name='datasets/SimpleDAO/SimpleDAO_0.4.19.sol:Mallory'
+        state_variables = self.extract_states_definitions()[c_name]#合约Mallory的合约变量声明节点的字典，state_variables长2
         var_names = []
         for var_name in state_variables:
             var_names.append(var_name["attributes"]["name"])#具体值：var_names：[u'dao', u'owner', u'performAttack']
-        return var_names
+        return var_names#var_names：[u'dao', u'owner']
 
-    def extract_func_call_srcs(self, c_name):
+    def extract_func_call_srcs(self, c_name):#c_name:'datasets/SimpleDAO/SimpleDAO_0.4.19.sol:Mallory'
         func_calls = self.extract_func_calls_definitions()[c_name]#指定合约的FunctionCall节点
         func_call_srcs = []
         for func_call in func_calls:

@@ -33,8 +33,8 @@ class SourceMap:
         self.source = self.__get_source()
         self.positions = self.__get_positions()
         self.instr_positions = {}#指令位置
-        self.var_names = self.__get_var_names()
-        self.func_call_names = self.__get_func_call_names()
+        self.var_names = self.__get_var_names()#self.var_names:[u'dao', u'owner']
+        self.func_call_names = self.__get_func_call_names()#__get_func_call_names获得
 
     def find_source_code(self, pc):
         try:
@@ -96,10 +96,10 @@ class SourceMap:
             return SourceMap.sources[fname]
 
     def __get_var_names(self):#self.cname:datasets/SimpleDAO/SimpleDAO_0.4.19.sol:Mallory
-        return SourceMap.ast_helper.extract_state_variable_names(self.cname)#合约的变量名列表
+        return SourceMap.ast_helper.extract_state_variable_names(self.cname)#合约的变量名列表，[u'dao', u'owner']
 
     def __get_func_call_names(self):
-        func_call_srcs = SourceMap.ast_helper.extract_func_call_srcs(self.cname)
+        func_call_srcs = SourceMap.ast_helper.extract_func_call_srcs(self.cname)#self.cname:'datasets/SimpleDAO/SimpleDAO_0.4.19.sol:Mallory'
         func_call_names = []
         for src in func_call_srcs:
             src = src.split(":")
