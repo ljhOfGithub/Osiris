@@ -271,7 +271,7 @@ def main():
         args.source = filename
         with open(filename, 'w') as f:
             f.write(code)
-
+    # 如果有字节码参数，先反汇编，然后根据evm汇编码操作
     # If we are given bytecode, disassemble first, as we need to operate on EVM ASM.
     if args.bytecode:
         processed_evm_file = args.source + '.evm'
@@ -294,7 +294,7 @@ def main():
                 exit(exit_code)
     else:
         # Compile contracts using solc
-        contracts = compileContracts(args.source)
+        contracts = compileContracts(args.source)#编译solidity文件
 
         # Analyze each contract
         for cname, bin_str in contracts:
