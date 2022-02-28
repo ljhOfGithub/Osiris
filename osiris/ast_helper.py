@@ -68,7 +68,7 @@ class AstHelper:
             source = self.contracts["sourcesByContract"][contract]#三个合约id对应同一个solidity文件
             full_name = source + ":" + name#规范完整可用于查找的合约名，全名是solidity文件名加合约名
             ret[full_name] = self.extract_state_definitions(full_name)#找到合约名才能找，构造合约全名和合约变量声明节点的字典
-        return ret
+        return ret#长3的字典
 
     def extract_func_call_definitions(self, c_name):#c_name:u'datasets/SimpleDAO/SimpleDAO_0.4.19.sol:Mallory2'
         node = self.contracts["contractsByName"][c_name]#查找某个节点下面的FunctionCall节点
@@ -83,7 +83,7 @@ class AstHelper:
         for contract in self.contracts["contractsById"]:#遍历所有合约节点的FunctionCall节点,self.contracts["contractsById"]长3，self.contracts["contractsById"].keys()：[204, 68, 117]
             name = self.contracts["contractsById"][contract]["attributes"]["name"]#u'Mallory2'
             source = self.contracts["sourcesByContract"][contract]#u'datasets/SimpleDAO/SimpleDAO_0.4.19.sol'
-            full_name = source + ":" + name#建立合约全名和合约函数调用的定义
+            full_name = source + ":" + name#建立合约全名和合约函数调用的定义，u'datasets/SimpleDAO/SimpleDAO_0.4.19.sol:Mallory2'
             ret[full_name] = self.extract_func_call_definitions(full_name)
         return ret
 
@@ -95,8 +95,8 @@ class AstHelper:
         return var_names#var_names：[u'dao', u'owner']
 
     def extract_func_call_srcs(self, c_name):#c_name:'datasets/SimpleDAO/SimpleDAO_0.4.19.sol:Mallory'
-        func_calls = self.extract_func_calls_definitions()[c_name]#指定合约的FunctionCall节点
-        func_call_srcs = []
+        func_calls = self.extract_func_calls_definitions()[c_name]#指定合约的FunctionCall节点，func_calls长2
+        func_call_srcs = []#合约调用的位置列表，三元组，Mallory调用send函数，withdraw函数
         for func_call in func_calls:
             func_call_srcs.append(func_call["src"])#指定合约的所有FunctionCall节点的source位置，即合约调用其他函数的源码位置
         return func_call_srcs
