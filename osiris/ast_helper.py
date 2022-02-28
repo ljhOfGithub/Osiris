@@ -35,13 +35,12 @@ class AstHelper:
         return ret
 
     def get_linearized_base_contracts(self, id, contractsById):#获得linearizedBaseContracts列表与原合约构成的map数据结构
-        return map(lambda id: contractsById[id], contractsById[id]["attributes"]["linearizedBaseContracts"])#
-    #id是204
+        return map(lambda id: contractsById[id], contractsById[id]["attributes"]["linearizedBaseContracts"])#contractsById[id]["attributes"]["linearizedBaseContracts"]是[204]，是列表
+        #lambda表达式里面使用列表中的每个元素获得contractsById[id]，contractsById[id]等价于self.contracts["contractsById"][204]
+
     def extract_state_definitions(self, c_name):#指定合约名，举例cname：u'datasets/SimpleDAO/SimpleDAO_0.4.19.sol:Mallory2'
-        node = self.contracts["contractsByName"][c_name]#长度为5的字典，包括attributes如下，src是831:569:0，children长度是7，name是ContractDefinition，id是204
-        #attributes：{u'contractDependencies': [None], u'linearizedBaseContracts': [204], u'name': u'Mallory2', u'documentation': None, u'contractKind': u'contract', u'scope': 205, u'fullyImplemented': True, u'baseContracts': [None]}
-        state_vars = []
-#self.contracts["contractsByName"][c_name]['children'][1]如下：
+        node = self.contracts["contractsByName"][c_name]#长度为5的字典，包括attributes，src，children长度是7，name是ContractDefinition，id是204
+        state_vars = []#self.contracts["contractsByName"][c_name]['children'][1]如下：
 # attributes
 # {u'storageLocation': u'default', u'constant': False, u'name': u'owner', u'stateVariable': True, u'value': None, u'visibility': u'internal', u'scope': 204, u'type': u'address'}
 # src
@@ -52,8 +51,8 @@ class AstHelper:
 # VariableDeclaration
 # id
 # 121
-        if node:#查到合约
-            base_contracts = self.get_linearized_base_contracts(node["id"], self.contracts["contractsById"])#linearizedBaseContracts列表
+        if node:#
+            base_contracts = self.get_linearized_base_contracts(node["id"], self.contracts["contractsById"])#根据某个合约找到linearizedBaseContracts列表
             base_contracts = list(reversed(base_contracts))
             for contract in base_contracts:
                 if "children" in contract:#基础合约列表的子节点的变量声明节点
