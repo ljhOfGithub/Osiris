@@ -34,7 +34,7 @@ class SourceMap:
         self.positions = self.__get_positions()
         self.instr_positions = {}#指令位置
         self.var_names = self.__get_var_names()#self.var_names:[u'dao', u'owner']
-        self.func_call_names = self.__get_func_call_names()#__get_func_call_names获得
+        self.func_call_names = self.__get_func_call_names()#__get_func_call_names获得，['owner.send(this.balance)', 'dao.withdraw(dao.queryCredit(this))']
 
     def find_source_code(self, pc):
         try:

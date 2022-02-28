@@ -114,8 +114,10 @@ def link_libraries(filename, libs):
     return extract_bin_str(out)
 
 def analyze(processed_evm_file, disasm_file, source_map = None):
+    #processed_evm_file：'datasets/SimpleDAO/SimpleDAO_0.4.19.sol:Mallory.evm'
+    #<source_map.SourceMap instance at 0x7eff52a728c0>
     '''Runs the symbolic execution.
-
+    disasm_file：'datasets/SimpleDAO/SimpleDAO_0.4.19.sol:Mallory.evm.disasm'
         Parameters
     ----------
     processed_evm_file : File descriptor of EVM bytecode file on which "removeSwarmHash" has been removed  TODO: Why not remove this argument and process disasm_file as necessary within analyze()? This way, the function makes implicit assumptions about the relation between those two arguments.
@@ -130,8 +132,8 @@ def analyze(processed_evm_file, disasm_file, source_map = None):
     # TODO: Why this check? The result is not used anyway and it is not said that processed_evm_file is related to disasm_file.
     try:
         disasm_p = subprocess.Popen(
-            ["evm", "disasm", processed_evm_file], stdout=subprocess.PIPE)
-        disasm_out = disasm_p.communicate()[0]
+            ["evm", "disasm", processed_evm_file], stdout=subprocess.PIPE)#disasm_p：<subprocess.Popen object at 0x7eff5225a210>
+        disasm_out = disasm_p.communicate()[0]#disasm_out是stdout,[1]是stderr，将evm文件进行反编译
     except:
         logging.critical("Disassembly failed.")
         exit()
@@ -141,7 +143,7 @@ def analyze(processed_evm_file, disasm_file, source_map = None):
 
     # Run symExec
     if source_map is not None:
-        symExec.main(disasm_file, args.source, source_map)
+        symExec.main(disasm_file, args.source, source_map)#
     else:
         symExec.main(disasm_file, args.source)
 
@@ -150,7 +152,7 @@ def remove_temporary_file(path):
     '''
     if os.path.isfile(path):
         try:
-            os.unlink(path)
+            os.unlink(path)#用于删除文件,如果文件是一个目录则返回一个错误。
         except:
             pass
 
@@ -284,8 +286,8 @@ def main():
 
         analyze(processed_evm_file, disasm_file)
 
-        remove_temporary_file(disasm_file)
-        remove_temporary_file(processed_evm_file)
+        remove_temporary_file(disasm_file)#删除evm.disasm文件
+        remove_temporary_file(processed_evm_file)#删除evm文件
         remove_temporary_file(disasm_file + '.log')
 
         if global_params.UNIT_TEST == 2 or global_params.UNIT_TEST == 3:
