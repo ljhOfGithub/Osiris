@@ -143,7 +143,7 @@ def analyze(processed_evm_file, disasm_file, source_map = None):
 
     # Run symExec
     if source_map is not None:
-        symExec.main(disasm_file, args.source, source_map)#需要等待执行
+        symExec.main(disasm_file, args.source, source_map)#需要等待符号执行，关键断点
     else:
         symExec.main(disasm_file, args.source)
 

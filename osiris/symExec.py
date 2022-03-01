@@ -67,10 +67,10 @@ def initGlobalVars():
     global solver
     # Z3 solver
     solver = Solver()
-    solver.set("timeout", global_params.TIMEOUT)
+    solver.set("timeout", global_params.TIMEOUT)#global_params.TIMEOUT=100
 
     global visited_pcs
-    visited_pcs = set()
+    visited_pcs = set()#初始化为set([])
 
     global results
     results = {
@@ -123,7 +123,7 @@ def initGlobalVars():
     money_flow_all_paths = []
 
     global reentrancy_all_paths
-    reentrancy_all_paths = []
+    reentrancy_all_paths = []#可重入路径
 
     global data_flow_all_paths
     data_flow_all_paths = [[], []] # store all storage addresses存储所有内存地址
@@ -153,10 +153,10 @@ def initGlobalVars():
     gen = Generator()
 
     global data_source
-    if global_params.USE_GLOBAL_BLOCKCHAIN:
+    if global_params.USE_GLOBAL_BLOCKCHAIN:#没传入
         data_source = EthereumData()
 
-    global log_file
+    global log_file #'datasets/SimpleDAO/SimpleDAO_0.4.19.sol:Mallory.evm.disasm'
     log_file = open(c_name + '.log', "w")
 
     global rfile
@@ -198,34 +198,34 @@ def compare_storage_and_gas_unit_test(global_state, analysis):
     exit(test_status)
 
 def change_format():#格式化反汇编文件
-    with open(c_name) as disasm_file:
+    with open(c_name) as disasm_file:#'datasets/SimpleDAO/SimpleDAO_0.4.19.sol:Mallory.evm.disasm'
         file_contents = disasm_file.readlines()#
-        i = 0
+        i = 0#file_contents[0]是尾部带\n的字节码
         firstLine = file_contents[0].strip('\n')#移除第一行字符串头尾指定的字符（默认为空格或换行符）或字符序列
         for line in file_contents:
             line = line.replace('SELFDESTRUCT', 'SUICIDE')#
             line = line.replace('Missing opcode 0xfd', 'REVERT')
             line = line.replace('Missing opcode 0xfe', 'ASSERTFAIL')
             line = line.replace('Missing opcode', 'INVALID')
-            line = line.replace(':', '')
-            lineParts = line.split(' ')
+            line = line.replace(':', '')#替换后如'000000 PUSH1 0x60\n'
+            lineParts = line.split(' ')#每行拆分成序号和指令，如['000000', 'PUSH1', '0x60\n']
             try: # removing initial zeroes
-                lineParts[0] = str(int(lineParts[0]))
+                lineParts[0] = str(int(lineParts[0]))#如果不是字节码而是序号则存储为不带前面的0的字符串，第二行是0
 
             except:
-                lineParts[0] = lineParts[0]
-            lineParts[-1] = lineParts[-1].strip('\n')
+                lineParts[0] = lineParts[0]#如果是十六进制（字节码）则触发异常直接存储
+            lineParts[-1] = lineParts[-1].strip('\n')#去除evm.disasm的每行的换行符，存储每行最后一个参数，第二行是0x60
             try: # adding arrow if last is a number如果最后是一个数字，添加箭头
-                lastInt = lineParts[-1]
-                if(int(lastInt, 16) or int(lastInt, 16) == 0) and len(lineParts) > 2:
-                    lineParts[-1] = "=>"
-                    lineParts.append(lastInt)
+                lastInt = lineParts[-1]#每行最后一个字符串，第二行是0x60
+                if(int(lastInt, 16) or int(lastInt, 16) == 0) and len(lineParts) > 2:#如果转换为16进制后，lineParts长度>2
+                    lineParts[-1] = "=>"#int(lastInt, 16)是96，len(lineParts)是3，这段的作用是往中间添加一个箭头
+                    lineParts.append(lastInt)#添加后是：['0', 'PUSH1', '=>', '0x60']
             except Exception:
                 pass
-            file_contents[i] = ' '.join(lineParts)
+            file_contents[i] = ' '.join(lineParts)#file_contents[0]是字节码，将数组转换为字符串
             i = i + 1
         file_contents[0] = firstLine
-        file_contents[-1] += '\n'
+        file_contents[-1] += '\n'#'743 STOP'加换行符
 
     with open(c_name, 'w') as disasm_file:
         disasm_file.write("\n".join(file_contents))
@@ -2874,11 +2874,11 @@ def closing_message():
 def handler(signum, frame):
     global g_timeout
 
-    if global_params.UNIT_TEST == 2 or global_params.UNIT_TEST == 3:
+    if global_params.UNIT_TEST == 2 or global_params.UNIT_TEST == 3:#如果是单元测试则退出
         exit(TIME_OUT)
-    print "!!! SYMBOLIC EXECUTION TIMEOUT !!!"
+    print "!!! SYMBOLIC EXECUTION TIMEOUT !!!"#符号执行超时处理函数
     g_timeout = True
-    raise Exception("timeout")
+    raise Exception("timeout")#报错
 
 def results_for_web():
     global results
@@ -2895,21 +2895,21 @@ def main(contract, contract_sol, _source_map = None):
     global validator
     global start_time
 
-    c_name = contract
-    c_name_sol = contract_sol
+    c_name = contract #'datasets/SimpleDAO/SimpleDAO_0.4.19.sol:Mallory.evm.disasm'
+    c_name_sol = contract_sol #'datasets/SimpleDAO/SimpleDAO_0.4.19.sol'
     source_map = _source_map
     validator = Validator(source_map)
 
     check_unit_test_file()
     initGlobalVars()
-    set_cur_file(c_name[4:] if len(c_name) > 5 else c_name)
+    set_cur_file(c_name[4:] if len(c_name) > 5 else c_name)#'sets/SimpleDAO/SimpleDAO_0.4.19.sol:Mallory.evm.disasm'
     start_time = time.time()
-    if hasattr(signal, 'SIGALRM'):
-        signal.signal(signal.SIGALRM, handler)
+    if hasattr(signal, 'SIGALRM'):#如果有设置超时阈值则调用相关的超时处理函数
+        signal.signal(signal.SIGALRM, handler)#signal.signal() 函数允许定义在接收到信号时执行的自定义处理程序。
         if global_params.UNIT_TEST == 2 or global_params.UNIT_TEST == 3:
             global_params.GLOBAL_TIMEOUT = global_params.GLOBAL_TIMEOUT_TEST
-        signal.alarm(global_params.GLOBAL_TIMEOUT)
-
+        signal.alarm(global_params.GLOBAL_TIMEOUT)#global_params.GLOBAL_TIMEOUT：50，设置更大的方便调试
+        #global_params.GLOBAL_TIMEOUT时间后，触发SIGALRM信号，触发处理程序
     log.info("Running, please wait...")
 
     init_taint_analysis()
