@@ -326,6 +326,9 @@ def main():
 
 if __name__ == '__main__':
     main()
+
+
+
 #INFO:symExec:     Concurrency bug:       True
 # Flow 1:
 # datasets/SimpleDAO/SimpleDAO_0.4.19.sol:Mallory2:61:16
@@ -345,6 +348,8 @@ if __name__ == '__main__':
 # INFO:symExec:    --- 3.97241997719 seconds ---
 # INFO:symExec:   ====== Analysis Completed ======
 # --Return--
+
+
 
 
 
@@ -381,3 +386,163 @@ if __name__ == '__main__':
 # INFO:symExec:    --- 3.7286169529 seconds ---
 # INFO:symExec:   ====== Analysis Completed ======
 # --Return--
+
+
+
+
+# INFO:symExec:Running, please wait...
+# INFO:symExec:   ============ Results ===========
+# INFO:symExec:     EVM code coverage:     99.7%
+# INFO:symExec:     Arithmetic bugs:       True
+# INFO:symExec:     └> Overflow bugs:      True
+# datasets/SimpleDAO/SimpleDAO_0.4.19.sol:SimpleDAO:7:5
+# credit[to] += msg.value
+# ^
+# INFO:symExec:     └> Underflow bugs:     True
+# datasets/SimpleDAO/SimpleDAO_0.4.19.sol:SimpleDAO:13:7
+# credit[msg.sender]-=amount
+# ^
+# INFO:symExec:     └> Division bugs:      False
+# INFO:symExec:     └> Modulo bugs:        False
+# INFO:symExec:     └> Truncation bugs:    False
+# INFO:symExec:     └> Signedness bugs:    False
+# INFO:symExec:     Callstack bug:         True
+# datasets/SimpleDAO/SimpleDAO_0.4.19.sol:SimpleDAO:12:18
+# msg.sender.call.value(amount)()
+# ^
+# INFO:symExec:     Concurrency bug:       False
+# INFO:symExec:     Time dependency bug:   False
+# INFO:symExec:     Reentrancy bug:        True
+# datasets/SimpleDAO/SimpleDAO_0.4.19.sol:SimpleDAO:12:18
+# msg.sender.call.value(amount)()
+# ^
+# INFO:symExec:    --- 20.1363739967 seconds ---
+# INFO:symExec:   ====== Analysis Completed ======
+# The program finished and will be restarted
+
+
+
+
+# INFO:symExec:Running, please wait...
+# INFO:symExec:   ============ Results ===========
+# INFO:symExec:     EVM code coverage:     99.8%
+# INFO:symExec:     Arithmetic bugs:       False
+# INFO:symExec:     └> Overflow bugs:      False
+# INFO:symExec:     └> Underflow bugs:     False
+# INFO:symExec:     └> Division bugs:      False
+# INFO:symExec:     └> Modulo bugs:        False
+# INFO:symExec:     └> Truncation bugs:    False
+# INFO:symExec:     └> Signedness bugs:    False
+# INFO:symExec:     Callstack bug:         True
+# datasets/SimpleDAO/SimpleDAO_0.4.19.sol:Mallory2:61:16
+# owner.send(this.balance)
+# ^
+# INFO:symExec:     Concurrency bug:       True
+# Flow 1:
+# datasets/SimpleDAO/SimpleDAO_0.4.19.sol:Mallory2:61:16
+# owner.send(this.balance)
+# ^
+# Flow 2:
+# datasets/SimpleDAO/SimpleDAO_0.4.19.sol:Mallory2:55:5
+# dao.donate.value(1)(this)
+# ^
+# INFO:symExec:     Time dependency bug:   False
+# INFO:symExec:     Reentrancy bug:        True
+# datasets/SimpleDAO/SimpleDAO_0.4.19.sol:Mallory2:56:5
+# dao.withdraw(1)
+# ^
+# datasets/SimpleDAO/SimpleDAO_0.4.19.sol:Mallory2:55:5
+# dao.donate.value(1)(this)
+# ^
+# INFO:symExec:    --- 4.04498291016 seconds ---
+# INFO:symExec:   ====== Analysis Completed ======
+
+# INFO:root:Contract datasets/SimpleDAO/SimpleDAO_0.4.19.sol:SimpleDAO:
+
+
+
+
+
+# INFO:root:Contract datasets/SimpleDAO/SimpleDAO_0.4.19.sol:Mallory:
+# INFO:symExec:Running, please wait...
+# INFO:symExec:   ============ Results ===========
+# INFO:symExec:     EVM code coverage:     99.7%
+# INFO:symExec:     Arithmetic bugs:       False
+# INFO:symExec:     └> Overflow bugs:      False
+# INFO:symExec:     └> Underflow bugs:     False
+# INFO:symExec:     └> Division bugs:      False
+# INFO:symExec:     └> Modulo bugs:        False
+# INFO:symExec:     └> Truncation bugs:    False
+# INFO:symExec:     └> Signedness bugs:    False
+# INFO:symExec:     Callstack bug:         False
+# INFO:symExec:     Concurrency bug:       False
+# INFO:symExec:     Time dependency bug:   False
+# INFO:symExec:     Reentrancy bug:        False
+# INFO:symExec:    --- 0.263648986816 seconds ---
+# INFO:symExec:   ====== Analysis Completed ======
+
+# INFO:root:Contract datasets/SimpleDAO/SimpleDAO_0.4.19.sol:Mallory2:
+# INFO:symExec:Running, please wait...
+# INFO:symExec:   ============ Results ===========
+# INFO:symExec:     EVM code coverage:     99.8%
+# INFO:symExec:     Arithmetic bugs:       False
+# INFO:symExec:     └> Overflow bugs:      False
+# INFO:symExec:     └> Underflow bugs:     False
+# INFO:symExec:     └> Division bugs:      False
+# INFO:symExec:     └> Modulo bugs:        False
+# INFO:symExec:     └> Truncation bugs:    False
+# INFO:symExec:     └> Signedness bugs:    False
+# INFO:symExec:     Callstack bug:         True
+# datasets/SimpleDAO/SimpleDAO_0.4.19.sol:Mallory2:61:16
+# owner.send(this.balance)
+# ^
+# INFO:symExec:     Concurrency bug:       True
+# Flow 1:
+# datasets/SimpleDAO/SimpleDAO_0.4.19.sol:Mallory2:61:16
+# owner.send(this.balance)
+# ^
+# Flow 2:
+# datasets/SimpleDAO/SimpleDAO_0.4.19.sol:Mallory2:55:5
+# dao.donate.value(1)(this)
+# ^
+# INFO:symExec:     Time dependency bug:   False
+# INFO:symExec:     Reentrancy bug:        True
+# datasets/SimpleDAO/SimpleDAO_0.4.19.sol:Mallory2:56:5
+# dao.withdraw(1)
+# ^
+# datasets/SimpleDAO/SimpleDAO_0.4.19.sol:Mallory2:55:5
+# dao.donate.value(1)(this)
+# ^
+# INFO:symExec:    --- 0.513692855835 seconds ---
+# INFO:symExec:   ====== Analysis Completed ======
+
+# INFO:root:Contract datasets/SimpleDAO/SimpleDAO_0.4.19.sol:SimpleDAO:
+# INFO:symExec:Running, please wait...
+# INFO:symExec:   ============ Results ===========
+# INFO:symExec:     EVM code coverage:     99.7%
+# INFO:symExec:     Arithmetic bugs:       True
+# INFO:symExec:     └> Overflow bugs:      True
+# datasets/SimpleDAO/SimpleDAO_0.4.19.sol:SimpleDAO:7:5
+# credit[to] += msg.value
+# ^
+# INFO:symExec:     └> Underflow bugs:     True
+# datasets/SimpleDAO/SimpleDAO_0.4.19.sol:SimpleDAO:13:7
+# credit[msg.sender]-=amount
+# ^
+# INFO:symExec:     └> Division bugs:      False
+# INFO:symExec:     └> Modulo bugs:        False
+# INFO:symExec:     └> Truncation bugs:    False
+# INFO:symExec:     └> Signedness bugs:    False
+# INFO:symExec:     Callstack bug:         True
+# datasets/SimpleDAO/SimpleDAO_0.4.19.sol:SimpleDAO:12:18
+# msg.sender.call.value(amount)()
+# ^
+# INFO:symExec:     Concurrency bug:       False
+# INFO:symExec:     Time dependency bug:   False
+# INFO:symExec:     Reentrancy bug:        True
+# datasets/SimpleDAO/SimpleDAO_0.4.19.sol:SimpleDAO:12:18
+# msg.sender.call.value(amount)()
+# ^
+# INFO:symExec:    --- 0.890538930893 seconds ---
+# INFO:symExec:   ====== Analysis Completed ======
+# The program finished and will be restarted
