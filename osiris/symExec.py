@@ -224,10 +224,10 @@ def change_format():#格式化反汇编文件
                 pass
             file_contents[i] = ' '.join(lineParts)#file_contents[0]是字节码，将数组转换为字符串
             i = i + 1
-        file_contents[0] = firstLine
+        file_contents[0] = firstLine#首个元素设置为字节码，这步是多余的
         file_contents[-1] += '\n'#'743 STOP'加换行符
 
-    with open(c_name, 'w') as disasm_file:
+    with open(c_name, 'w') as disasm_file:#重写回反汇编文件
         disasm_file.write("\n".join(file_contents))
 
 def build_cfg_and_analyze():
@@ -337,11 +337,11 @@ def mapping_non_push_instruction(current_line_content, current_ins_address, idx,
 # 2. Then identify each basic block (i.e. one-in, one-out)
 # 3. Store them in vertices
 def collect_vertices(tokens):
-    global source_map
+    global source_map#声明全局变量
     if source_map:#初始化
         idx = 0
         positions = source_map.positions
-        length = len(positions)
+        length = len(positions)#327
     global end_ins_dict
     global instructions
     global jump_type
