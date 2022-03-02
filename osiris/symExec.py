@@ -98,7 +98,7 @@ def initGlobalVars():
 
     # capturing the last statement of each basic block
     # 捕获每个基本块的最后一个语句 end_instruction_dictionary
-    global end_ins_dict
+    global end_ins_dict#声明全局变量
     end_ins_dict = {}
 
     # capturing all the instructions, keys are corresponding addresses
@@ -238,7 +238,7 @@ def build_cfg_and_analyze():
         disasm_file.readline()  # Remove first line；移除'datasets/SimpleDAO/SimpleDAO_0.4.19.sol:Mallory.evm.disasm'文件首行字节码后，将evm.disasm文件剩余部分构造成tokens对象
         tokens = tokenize.generate_tokens(disasm_file.readline)#以编程方式对文件进行标记的例子，用 generate_tokens() 读取 unicode 字符串而不是字节；tokens是一个具名数组的迭代器 
         #生成器产生 5 个具有这些成员的元组：令牌类型；令牌字符串；指定令牌在源中开始的行和列的 2 元组 (srow, scol) ；指定令牌在源中结束的行和列的 2 元组 (erow, ecol) ；以及发现令牌的行。所传递的行（最后一个元组项）是 实际的 行。 5 个元组以 named tuple 的形式返回，字段名是： type string start end line 。
-        collect_vertices(tokens)#根据指令构造节点
+        collect_vertices(tokens)#根据指令构造节点，收集一个块的节点后，构造基本块
         construct_bb()#构造基本块
         construct_static_edges()#构造基本块的静态边
         full_sym_exec()  # jump targets are constructed on the fly跳跃目标是在飞行中构造的
@@ -356,7 +356,7 @@ def collect_vertices(tokens):
     is_new_block = False
 
     for tok_type, tok_string, (srow, scol), _, line_number in tokens:#处理tokenInfo对象，也是指令对象，包含指令的类型，具体的指令，指令的行号列号，舍弃最后发现的指令位置
-        if wait_for_push is True:#push后面的参数，push指令
+        if wait_for_push is True:#push后面的参数，push指令，第一行不是push
             push_val = ""#定义的指令类型：1是汇编指令NAME，2是立即数NUMBER，4是换行符NEW LINE，5是等于号=
             for ptok_type, ptok_string, _, _, _ in tokens:#
                 if ptok_type == NEWLINE:#含换行符的行
@@ -419,12 +419,12 @@ def collect_vertices(tokens):
     if current_block not in end_ins_dict:
         log.debug("current block: %d", current_block)
         log.debug("last line: %d", current_ins_address)
-        end_ins_dict[current_block] = current_ins_address
+        end_ins_dict[current_block] = current_ins_address#第一行current_ins_address：0，current_block：0
 
-    if current_block not in jump_type:
-        jump_type[current_block] = "terminal"
+    if current_block not in jump_type:#jump_type：[]
+        jump_type[current_block] = "terminal"#{0: 'terminal'}
 
-    for key in end_ins_dict:
+    for key in end_ins_dict:#遍历每个块对应的结束语句，key：0，end_ins_dict：{0: 0}，key not in jump_type：false
         if key not in jump_type:
             jump_type[key] = "falls_to"
 
@@ -432,12 +432,12 @@ def collect_vertices(tokens):
 def construct_bb():
     global vertices
     global edges
-    sorted_addresses = sorted(instructions.keys())
-    size = len(sorted_addresses)
+    sorted_addresses = sorted(instructions.keys())#第一个基本块：instructions：{}
+    size = len(sorted_addresses)#第一个基本块：size：0，end_ins_dict：{0：0}
     for key in end_ins_dict:#end_ins_dict某种指令的开始和结束字符位置，key是开始字符位置，end_address是结束字符位置
         end_address = end_ins_dict[key]
-        block = BasicBlock(key, end_address)
-        if key not in instructions:
+        block = BasicBlock(key, end_address)#第一个基本块：key：0，end_address：0
+        if key not in instructions:#0不在instructions中
             continue
         block.add_instruction(instructions[key])#往基本块中添加指令
         i = sorted_addresses.index(key) + 1
@@ -456,19 +456,19 @@ def construct_static_edges():
 def add_falls_to():#构造静态边
     global vertices
     global edges
-    key_list = sorted(jump_type.keys())
+    key_list = sorted(jump_type.keys())#jump_type是{0: 'terminal'}，key_list是[0]
     length = len(key_list)
     for i, key in enumerate(key_list):#还有后续块的块，不是无条件跳转的块，包含有条件跳转的块，需要设置条件不满足时的跳转，称为静态的边的构造
-        if jump_type[key] != "terminal" and jump_type[key] != "unconditional" and i+1 < length:
+        if jump_type[key] != "terminal" and jump_type[key] != "unconditional" and i+1 < length:#不是结束语句，不是无条件跳转语句，如果i+1>=length，则是一个块最后一条语句，即不是最后一条语句
             target = key_list[i+1]
             edges[key].append(target)#添加有向边，key->target
             vertices[key].set_falls_to(target)#默认的跳转
 
-def get_init_global_state(path_conditions_and_vars):
+def get_init_global_state(path_conditions_and_vars):#path_conditions_and_vars：{"path_condition" : []}
     global_state = {"balance" : {}, "pc": 0}
-    init_is = init_ia = deposited_value = sender_address = receiver_address = gas_price = origin = currentCoinbase = currentNumber = currentDifficulty = currentGasLimit = callData = None
+    init_is = init_ia = deposited_value = sender_address = receiver_address = gas_price = origin = currentCoinbase = currentNumber = currentDifficulty = currentGasLimit = callData = None#空对象
 
-    if global_params.INPUT_STATE:#从state.json中初始化全局变量
+    if global_params.INPUT_STATE:#从state.json中初始化全局变量，global_params.INPUT_STATE：0
         with open('state.json') as f:
             state = json.loads(f.read())
             if state["Is"]["balance"]:
@@ -502,57 +502,57 @@ def get_init_global_state(path_conditions_and_vars):
         init_is = BitVec("init_Is", 256)
         init_ia = BitVec("init_Ia", 256)
 
-    path_conditions_and_vars["Is"] = sender_address
-    path_conditions_and_vars["Ia"] = receiver_address
-    path_conditions_and_vars["Iv"] = deposited_value
+    path_conditions_and_vars["Is"] = sender_address#"Is"
+    path_conditions_and_vars["Ia"] = receiver_address#"Ia"
+    path_conditions_and_vars["Iv"] = deposited_value#"Iv"
 
-    constraint = (deposited_value >= BitVecVal(0, 256))
+    constraint = (deposited_value >= BitVecVal(0, 256))#constraint:Iv>=0
     path_conditions_and_vars["path_condition"].append(constraint)
-    constraint = (init_is >= deposited_value)
+    constraint = (init_is >= deposited_value)#init_Is >= Iv
     path_conditions_and_vars["path_condition"].append(constraint)
-    constraint = (init_ia >= BitVecVal(0, 256))
-    path_conditions_and_vars["path_condition"].append(constraint)
+    constraint = (init_ia >= BitVecVal(0, 256))#init_Ia >= 0
+    path_conditions_and_vars["path_condition"].append(constraint)#path_conditions_and_vars:{'Ia': Ia, 'path_condition': [Iv >= 0, init_Is >= Iv, init_Ia >= 0], 'Is': Is, 'Iv': Iv}
 
     # update the balances of the "caller" and "callee"
 
-    global_state["balance"]["Is"] = (init_is - deposited_value)
-    global_state["balance"]["Ia"] = (init_ia + deposited_value)
+    global_state["balance"]["Is"] = (init_is - deposited_value)#init_Is - Iv
+    global_state["balance"]["Ia"] = (init_ia + deposited_value)#init_Ia + Iv
 
-    if not gas_price:
-        new_var_name = gen.gen_gas_price_var()
-        gas_price = BitVec(new_var_name, 256)
-        path_conditions_and_vars[new_var_name] = gas_price
+    if not gas_price:#如果没有燃气价格
+        new_var_name = gen.gen_gas_price_var()#创建一个变量，返回的是字符串类型"tx.gasprice"
+        gas_price = BitVec(new_var_name, 256)#tx.gasprice
+        path_conditions_and_vars[new_var_name] = gas_price#{'Ia': Ia, 'path_condition': [Iv >= 0, init_Is >= Iv, init_Ia >= 0], 'Is': Is, 'tx.gasprice': tx.gasprice, 'Iv': Iv}
 
     if not origin:
         new_var_name = gen.gen_origin_var()
-        origin = BitVec(new_var_name, 256)
-        path_conditions_and_vars[new_var_name] = origin
+        origin = BitVec(new_var_name, 256)#'tx.origin'
+        path_conditions_and_vars[new_var_name] = origin#{'path_condition': [Iv >= 0, init_Is >= Iv, init_Ia >= 0], 'tx.origin': tx.origin, 'Is': Is, 'Iv': Iv, 'tx.gasprice': tx.gasprice, 'Ia': Ia}
 
-    if not currentCoinbase:
+    if not currentCoinbase:#铸币
         new_var_name = "IH_c"
-        currentCoinbase = BitVec(new_var_name, 256)
-        path_conditions_and_vars[new_var_name] = currentCoinbase
+        currentCoinbase = BitVec(new_var_name, 256)#IH_c
+        path_conditions_and_vars[new_var_name] = currentCoinbase#{'path_condition': [Iv >= 0, init_Is >= Iv, init_Ia >= 0], 'tx.origin': tx.origin, 'Is': Is, 'Iv': Iv, 'tx.gasprice': tx.gasprice, 'IH_c': IH_c, 'Ia': Ia}
 
     if not currentNumber:
         new_var_name = "IH_i"
         currentNumber = BitVec(new_var_name, 256)
-        path_conditions_and_vars[new_var_name] = currentNumber
+        path_conditions_and_vars[new_var_name] = currentNumber#{'path_condition': [Iv >= 0, init_Is >= Iv, init_Ia >= 0], 'tx.origin': tx.origin, 'Is': Is, 'Iv': Iv, 'tx.gasprice': tx.gasprice, 'IH_c': IH_c, 'Ia': Ia, 'IH_i': IH_i}
 
     if not currentDifficulty:
         new_var_name = "IH_d"
         currentDifficulty = BitVec(new_var_name, 256)
-        path_conditions_and_vars[new_var_name] = currentDifficulty
+        path_conditions_and_vars[new_var_name] = currentDifficulty#{'path_condition': [Iv >= 0, init_Is >= Iv, init_Ia >= 0], 'tx.origin': tx.origin, 'Is': Is, 'Iv': Iv, 'IH_d': IH_d, 'tx.gasprice': tx.gasprice, 'IH_c': IH_c, 'Ia': Ia, 'IH_i': IH_i}
 
     if not currentGasLimit:
         new_var_name = "IH_l"
         currentGasLimit = BitVec(new_var_name, 256)
-        path_conditions_and_vars[new_var_name] = currentGasLimit
+        path_conditions_and_vars[new_var_name] = currentGasLimit#{'path_condition': [Iv >= 0, init_Is >= Iv, init_Ia >= 0], 'tx.origin': tx.origin, 'Is': Is, 'Iv': Iv, 'IH_d': IH_d, 'tx.gasprice': tx.gasprice, 'IH_c': IH_c, 'Ia': Ia, 'IH_l': IH_l, 'IH_i': IH_i}
 
     new_var_name = "IH_s"
     currentTimestamp = BitVec(new_var_name, 256)
-    path_conditions_and_vars[new_var_name] = currentTimestamp
+    path_conditions_and_vars[new_var_name] = currentTimestamp#{'path_condition': [Iv >= 0, init_Is >= Iv, init_Ia >= 0], 'IH_s': IH_s, 'tx.origin': tx.origin, 'Is': Is, 'Iv': Iv, 'IH_d': IH_d, 'tx.gasprice': tx.gasprice, 'IH_c': IH_c, 'Ia': Ia, 'IH_l': IH_l, 'IH_i': IH_i}
 
-    # the state of the current current contract
+    # the state of the current current contract 开始初始化global state
     if "Ia" not in global_state:
         global_state["Ia"] = {}
     global_state["miu_i"] = 0
@@ -565,7 +565,7 @@ def get_init_global_state(path_conditions_and_vars):
     global_state["currentTimestamp"] = currentTimestamp
     global_state["currentNumber"] = currentNumber
     global_state["currentDifficulty"] = currentDifficulty
-    global_state["currentGasLimit"] = currentGasLimit
+    global_state["currentGasLimit"] = currentGasLimit#{'origin': tx.origin, 'gas_price': tx.gasprice, 'currentTimestamp': IH_s, 'miu_i': 0, 'currentCoinbase': IH_c, 'value': Iv, 'sender_address': Is, 'pc': 0, 'currentDifficulty': IH_d, 'Ia': {}, 'receiver_address': Ia, 'balance': {'Ia': init_Ia + Iv, 'Is': init_Is - Iv}, 'currentNumber': IH_i}
 
     return global_state
 
