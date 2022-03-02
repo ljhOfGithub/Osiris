@@ -233,10 +233,11 @@ def change_format():#格式化反汇编文件
 def build_cfg_and_analyze():
     global source_map
 
-    change_format()
+    change_format()#格式化evm.disasm文件，首行是字节码，剩余是解析的指令，有序号，指令，参数等
     with open(c_name, 'r') as disasm_file:
-        disasm_file.readline()  # Remove first line
-        tokens = tokenize.generate_tokens(disasm_file.readline)#以编程方式对文件进行标记的例子，用 generate_tokens() 读取 unicode 字符串而不是字节:
+        disasm_file.readline()  # Remove first line；移除'datasets/SimpleDAO/SimpleDAO_0.4.19.sol:Mallory.evm.disasm'文件首行字节码后，将evm.disasm文件剩余部分构造成tokens对象
+        tokens = tokenize.generate_tokens(disasm_file.readline)#以编程方式对文件进行标记的例子，用 generate_tokens() 读取 unicode 字符串而不是字节；tokens是一个具名数组的迭代器 
+        #生成器产生 5 个具有这些成员的元组：令牌类型；令牌字符串；指定令牌在源中开始的行和列的 2 元组 (srow, scol) ；指定令牌在源中结束的行和列的 2 元组 (erow, ecol) ；以及发现令牌的行。所传递的行（最后一个元组项）是 实际的 行。 5 个元组以 named tuple 的形式返回，字段名是： type string start end line 。
         collect_vertices(tokens)#根据指令构造节点
         construct_bb()#构造基本块
         construct_static_edges()#构造基本块的静态边
@@ -354,7 +355,7 @@ def collect_vertices(tokens):
     wait_for_push = False
     is_new_block = False
 
-    for tok_type, tok_string, (srow, scol), _, line_number in tokens:#处理tokenInfo对象，也是指令对象，包含指令的类型，具体的指令，指令的行号列号
+    for tok_type, tok_string, (srow, scol), _, line_number in tokens:#处理tokenInfo对象，也是指令对象，包含指令的类型，具体的指令，指令的行号列号，舍弃最后发现的指令位置
         if wait_for_push is True:#push后面的参数，push指令
             push_val = ""#定义的指令类型：1是汇编指令NAME，2是立即数NUMBER，4是换行符NEW LINE，5是等于号=
             for ptok_type, ptok_string, _, _, _ in tokens:#

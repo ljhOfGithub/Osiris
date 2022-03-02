@@ -79,7 +79,7 @@ class InstructionObject:
         else:
             return False
 
-def init_taint_analysis():
+def init_taint_analysis():#被symexec导入
     global branches
     global tainted_stack
     global tainted_memory
