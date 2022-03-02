@@ -284,7 +284,7 @@ def main():
         with open(processed_evm_file, 'w') as f:
             f.write(removeSwarmHash(evm))
 
-        analyze(processed_evm_file, disasm_file)
+        analyze(processed_evm_file, disasm_file)#main->analyze->symexec.main()->symexec.py closing_message();Mallory->Mallory2->SimpleDAO
 
         remove_temporary_file(disasm_file)#删除evm.disasm文件
         remove_temporary_file(processed_evm_file)#删除evm文件
@@ -299,7 +299,7 @@ def main():
         contracts = compileContracts(args.source)#编译solidity文件，contracts是list，元素是tuple，tuple的第一个是'solidity文件名：合约名'的字符串
 
         # Analyze each contract
-        for cname, bin_str in contracts:#二元tuple列表的遍历
+        for cname, bin_str in contracts:#二元tuple列表的遍历，按照编译好的合约顺序进行分析，顺序由编译器决定
             print("")
             logging.info("Contract %s:", cname)
             processed_evm_file = cname + '.evm'#cname：'datasets/SimpleDAO/SimpleDAO_0.4.19.sol:Mallory'
