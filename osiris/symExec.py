@@ -56,8 +56,8 @@ class Parameter:
             "global_state": {},
             "path_conditions_and_vars": {}
         }
-        for (attr, default) in attr_defaults.iteritems():
-            setattr(self, attr, kwargs.get(attr, default))
+        for (attr, default) in attr_defaults.iteritems():#设置属性默认值，并且使用传入的参数设置对应初始值，如果没有对应的参数，则使用attr_defaults中设置的默认值，iteritems遍历字典的所有值
+            setattr(self, attr, kwargs.get(attr, default))#kwargs：字典类型，就是初始的值{'global_state': {'origin': tx.origin, 'gas_price': tx.gasprice, 'currentTimestamp': IH_s, 'miu_i': 0, 'currentCoinbase': IH_c, 'value': Iv, 'sender_address': Is, 'pc': 0, 'currentDifficulty': IH_d, 'Ia': {}, 'currentGasLimit': IH_l, 'receiver_address': Ia, 'balance': {'Ia': init_Ia + Iv, 'Is': init_Is - Iv}, 'currentNumber': IH_i}, 'path_conditions_and_vars': {'path_condition': [Iv >= 0, init_Is >= Iv, init_Ia >= 0], 'IH_s': IH_s, 'tx.origin': tx.origin, 'Is': Is, 'Iv': Iv, 'IH_d': IH_d, 'tx.gasprice': tx.gasprice, 'IH_c': IH_c, 'Ia': Ia, 'IH_l': IH_l, 'IH_i': IH_i}, 'analysis': {'sstore': {}, 'money_flow': [('Is', 'Ia', 'Iv')], 'sload': [], 'reentrancy_bug': [], 'money_concurrency_bug': [], 'gas_mem': 0, 'gas': 0, 'time_dependency_bug': {}}}
 
     def copy(self):
         _kwargs = custom_deepcopy(self.__dict__)
@@ -574,12 +574,12 @@ def full_sym_exec():
     # executing, starting from beginning
     path_conditions_and_vars = {"path_condition" : []}#路径条件
     global_state = get_init_global_state(path_conditions_and_vars)#使用初始条件
-    analysis = init_analysis()#初始化analysis字典
-    params = Parameter(path_conditions_and_vars=path_conditions_and_vars, global_state=global_state, analysis=analysis)
-    return sym_exec_block(params)
+    analysis = init_analysis()#初始化analysis字典,{'sstore': {}, 'money_flow': [('Is', 'Ia', 'Iv')], 'sload': [], 'reentrancy_bug': [], 'money_concurrency_bug': [], 'gas_mem': 0, 'gas': 0, 'time_dependency_bug': {}}
+    params = Parameter(path_conditions_and_vars=path_conditions_and_vars, global_state=global_state, analysis=analysis)#使用'analysis'作为对象的属性名，通过iteritems()获取attr,default中的attr
+    return sym_exec_block(params)#
 
 
-# Symbolically executing a block from the start address
+# Symbolically executing a block from the start address 从起始地址开始符号执行一个块
 def sym_exec_block(params):#符号执行一个块
     global solver
     global visited_edges
@@ -604,10 +604,10 @@ def sym_exec_block(params):#符号执行一个块
     analysis = params.analysis
     models = params.models
     calls = params.calls
-    func_call = params.func_call
+    func_call = params.func_call#将对象的初始值传入变量
 
     Edge = namedtuple("Edge", ["v1", "v2"]) # Factory Function for tuples is used as dictionary key元组的Factory Function用作字典键
-    if block < 0:
+    if block < 0:#无传参初始化后block：0
         log.debug("UNKNOWN JUMP ADDRESS. TERMINATING THIS PATH")#当前block地址非法
         return ["ERROR"]
 
