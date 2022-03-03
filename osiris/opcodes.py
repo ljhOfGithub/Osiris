@@ -148,12 +148,12 @@ Whigh = ("JUMPI")
 Wext = ("EXTCODESIZE")
 
 def get_opcode(opcode):
-    if opcode in opcodes:
+    if opcode in opcodes:#PUSH1不在opcodes
         return opcodes[opcode]
     # check PUSHi
     for i in range(32):
-        if opcode == 'PUSH' + str(i + 1):
-            return [hex(0x60 + i), 0, 1]
+        if opcode == 'PUSH' + str(i + 1):#遍历PUSH类指令
+            return [hex(0x60 + i), 0, 1]#['0x60', 0, 1]
 
     # check DUPi
     for i in range(16):

@@ -103,8 +103,8 @@ def check_reentrancy_bug(path_conditions_and_vars, stack, global_state):
 # analysis = {'sstore': {}, 'money_flow': [('Is', 'Ia', 'Iv')], 'sload': [], 'reentrancy_bug': [], 'money_concurrency_bug': [], 'gas_mem': 0, 'gas': 0, 'time_dependency_bug': {}}
 # solver = []
 def calculate_gas(opcode, stack, mem, global_state, analysis, solver):
-    gas_increment = get_ins_cost(opcode) # base cost
-    gas_memory = analysis["gas_mem"]
+    gas_increment = get_ins_cost(opcode) # base cost；get_ins_cost(opcode)=3
+    gas_memory = analysis["gas_mem"]#0
     # In some opcodes, gas cost is not only depend on opcode itself but also current state of evm
     # For symbolic variables, we only add base cost part for simplicity
     if opcode in ("LOG0", "LOG1", "LOG2", "LOG3", "LOG4") and len(stack) > 1:
@@ -188,9 +188,9 @@ def calculate_gas(opcode, stack, mem, global_state, analysis, solver):
 
 
     #Calculate gas memory, add it to total gas used
-    length = len(mem.keys()) # number of memory words
-    new_gas_memory = GCOST["Gmemory"] * length + (length ** 2) // 512
-    gas_increment += new_gas_memory - gas_memory
+    length = len(mem.keys()) # number of memory words，length=0，mem.keys()：[]；根据内存的长度计算负载的gas费用
+    new_gas_memory = GCOST["Gmemory"] * length + (length ** 2) // 512 #GCOST["Gmemory"]=3，new_gas_memory=0
+    gas_increment += new_gas_memory - gas_memory#gas_memory=0，gas_increment=0
 
     return (gas_increment, new_gas_memory)
 #analysis = {'sstore': {}, 'money_flow': [('Is', 'Ia', 'Iv')], 'sload': [], 'reentrancy_bug': [], 'money_concurrency_bug': [], 'gas_mem': 0, 'gas': 0, 'time_dependency_bug': {}}
@@ -202,13 +202,13 @@ def calculate_gas(opcode, stack, mem, global_state, analysis, solver):
 # solver = []
 def update_analysis(analysis, opcode, stack, mem, global_state, path_conditions_and_vars, solver):
     gas_increment, gas_memory = calculate_gas(opcode, stack, mem, global_state, analysis, solver)
-    analysis["gas"] += gas_increment
-    analysis["gas_mem"] = gas_memory
+    analysis["gas"] += gas_increment#+=3
+    analysis["gas_mem"] = gas_memory#+=0
 
-    if opcode == "CALL":
-        recipient = stack[1]
-        transfer_amount = stack[2]
-        if isReal(transfer_amount) and transfer_amount == 0:
+    if opcode == "CALL":#调用函数
+        recipient = stack[1]#接收者
+        transfer_amount = stack[2]#转钱
+        if isReal(transfer_amount) and transfer_amount == 0:#
             return
         if isSymbolic(recipient):
             recipient = simplify(recipient)
@@ -224,7 +224,7 @@ def update_analysis(analysis, opcode, stack, mem, global_state, path_conditions_
             recipient = simplify(recipient)
         analysis["money_flow"].append(("Ia", str(recipient), "all_remaining"))
     # this is for data flow
-    elif global_params.DATA_FLOW:
+    elif global_params.DATA_FLOW:#global_params.DATA_FLOW：1记录数据读取和存储的指令
         if opcode == "SLOAD":
             if len(stack) > 0:
                 address = stack[0]

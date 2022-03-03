@@ -869,7 +869,8 @@ def sym_exec_ins(params):#ethervm.io的所有单条指令
     #上述步骤应该在符号执行指令之前执行
     #因为SE（符号执行）将修改堆栈和内存
     update_analysis(analysis, instr_parts[0], stack, mem, global_state, path_conditions_and_vars, solver)
-    if instr_parts[0] == "CALL" and analysis["reentrancy_bug"] and analysis["reentrancy_bug"][-1]:
+    #更新后：{'sstore': {}, 'money_flow': [('Is', 'Ia', 'Iv')], 'sload': [], 'reentrancy_bug': [], 'money_concurrency_bug': [], 'gas_mem': 0, 'gas': 3, 'time_dependency_bug': {}}
+    if instr_parts[0] == "CALL" and analysis["reentrancy_bug"] and analysis["reentrancy_bug"][-1]:#instr_parts[0]是call即指令是call
         global_problematic_pcs["reentrancy_bug"].append(global_state["pc"])
 
     log.debug("==============================")
@@ -1982,9 +1983,9 @@ def sym_exec_ins(params):#ethervm.io的所有单条指令
     #  60s & 70s: Push Operations
     #
     elif instr_parts[0].startswith('PUSH', 0):  # this is a push instruction
-        position = int(instr_parts[0][4:], 10)
-        global_state["pc"] = global_state["pc"] + 1 + position
-        pushed_value = int(instr_parts[1], 16)
+        position = int(instr_parts[0][4:], 10)#instr_parts[0][4:]是1，按照十进制转换为int
+        global_state["pc"] = global_state["pc"] + 1 + position#global_state["pc"]：2
+        pushed_value = int(instr_parts[1], 16)#0x60，按照十六进制转为int，96
         stack.insert(0, pushed_value)
         if global_params.UNIT_TEST == 3: # test evm symbolic
             stack[0] = BitVecVal(stack[0], 256)
@@ -2210,13 +2211,16 @@ def sym_exec_ins(params):#ethervm.io的所有单条指令
 
     """ Perform taint analysis """
     try:
-        next_blocks = []
-        if start in edges:
-            for edge in edges[start]:
-                if edge in vertices:
-                    next_blocks.append(vertices[edge])
+        next_blocks = []#start=0
+        if start in edges:#{0: [13], 13: [65], 465: [], 539: [546], 546: [], 550: [], 424: [], 428: [437], 558: [], 437: [], 441: [], 320: [], 65: [76], 324: [333], 454: [461], 584: [], 76: [320], 333: [], 461: [], 337: [424], 473: [], 743: [], 621: []}各个块的边
+            for edge in edges[start]:#edge：13，edges[start]：[13]
+                if edge in vertices:#vertices：{0: <basicblock.BasicBlock instance at 0x7fc7ef157518>, 13: <basicblock.BasicBlock instance at 0x7fc7efa33638>, 465: <basicblock.BasicBlock instance at 0x7fc7ef14a200>, 539: <basicblock.BasicBlock instance at 0x7fc7ef1de878>, 546: <basicblock.BasicBlock instance at 0x7fc7ef1de638>, 550: <basicblock.BasicBlock instance at 0x7fc7ef1de4d0>, 424: <basicblock.BasicBlock instance at 0x7fc7ef1deef0>, 428: <basicblock.BasicBlock instance at 0x7fc7ef1dea28>, 558: <basicblock.BasicBlock instance at 0x7fc7ef1ded88>, 437: <basicblock.BasicBlock instance at 0x7fc7ef1de950>, 441: <basicblock.BasicBlock instance at 0x7fc7ef1decf8>, 320: <basicblock.BasicBlock instance at 0x7fc7ef1de680>, 65: <basicblock.BasicBlock instance at 0x7fc7ef1de908>, 324: <basicblock.BasicBlock instance at 0x7fc7ef1de560>, 454: <basicblock.BasicBlock instance at 0x7fc7ef1de128>, 584: <basicblock.BasicBlock instance at 0x7fc7ef1de3f8>, 76: <basicblock.BasicBlock instance at 0x7fc7ef1de7a0>, 333: <basicblock.BasicBlock instance at 0x7fc7ef1de248>, 461: <basicblock.BasicBlock instance at 0x7fc7ef1def38>, 337: <basicblock.BasicBlock instance at 0x7fc7ef14a320>, 473: <basicblock.BasicBlock instance at 0x7fc7ef14a830>, 743: <basicblock.BasicBlock instance at 0x7fc7ef14a6c8>, 621: <basicblock.BasicBlock instance at 0x7fc7ef14acb0>}
+                    next_blocks.append(vertices[edge])#vertices[edge]：<basicblock.BasicBlock instance at 0x7fc7efa33638>
         perform_taint_analysis(vertices[params.pre_block], vertices[params.block], next_blocks, previous_pc, instr_parts[0], previous_stack, stack, arithmetic_errors)
     except Exception as e:
+#previous_block = <basicblock.BasicBlock instance at 0x7fc7ef157518>即vertices[params.pre_block]
+# current_block = <basicblock.BasicBlock instance at 0x7fc7ef157518>即vertices[params.block]
+# next_blocks = [<basicblock.BasicBlock instance at 0x7fc7efa33638>]即next_blocks
         traceback.print_exc()
         print "Exception in taint analysis: "+str(e)
         raise e

@@ -610,20 +610,24 @@ def remove_taint(matches, taint, tainted_stack, tainted_memory, tainted_storage,
                         tainted_storage[address].taint = None
 
 def perform_taint_analysis(previous_block, current_block, next_blocks, pc, opcode, previous_stack, current_stack, arithmetic_errors):
-    global branches
-    global tainted_stack
-    global tainted_memory
-    global tainted_storage
-    global storage_flows
-    global sink_flows
-    global sha3_list
-    global false_positives
-    global strings
-
+    global branches#{}
+    global tainted_stack#[]
+    global tainted_memory#{}
+    global tainted_storage#{}
+    global storage_flows#[]
+    global sink_flows#[]
+    global sha3_list#set([])
+    global false_positives#[]
+    global strings#set([])
+#pc = 0
+# opcode = PUSH1
+# previous_stack = []
+# current_stack = [96]
+# arithmetic_errors = []
     try:
         # Get number of items taken/added to stack by this opcode获取该操作码获取/添加到栈的项目数
-        items_taken_count = get_opcode(opcode)[1]
-        items_added_count = get_opcode(opcode)[2]
+        items_taken_count = get_opcode(opcode)[1]#0
+        items_added_count = get_opcode(opcode)[2]#1
 
         # IN: arguments pop'ed from (previous) stack从(以前的)栈中弹出的参数
         data_in = []
@@ -633,10 +637,10 @@ def perform_taint_analysis(previous_block, current_block, next_blocks, pc, opcod
         # OUT: values written to (new) stack OUT:写入(新)栈的值
         data_out = []
         for i in range(items_added_count):
-            data_out.append(current_stack[i])
+            data_out.append(current_stack[i])#current_stack[i]：96
 
         # Create an instruction object#创建指令对象
-        instruction = InstructionObject(opcode, data_in, data_out)
+        instruction = InstructionObject(opcode, data_in, data_out)#
 
         # Load tainted stack, memory and storage if we are at a branch#加载被污染的堆栈，内存和存储，如果我们在一个分支
         if pc in branches and previous_block.get_end_address() in branches[pc]:
