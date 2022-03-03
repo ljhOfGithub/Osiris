@@ -696,7 +696,7 @@ def sym_exec_block(params):#符号执行一个块
             print "Depth: "+str(depth)
             print ""
 
-        display_analysis(analysis)#展示money_flow
+        display_analysis(analysis)#展示money_flow，analysis：{'sstore': {}, 'money_flow': [('Is', 'Ia', 'Iv')], 'money_concurrency_bug': [], 'gas': 742, 'sload': [0], 'reentrancy_bug': [], 'gas_mem': 9, 'time_dependency_bug': {3: 12, 4: 319, 5: 332, 6: 423, 7: 436}}
         if global_params.UNIT_TEST == 1:
             compare_stack_unit_test(stack)
         if global_params.UNIT_TEST == 2 or global_params.UNIT_TEST == 3:
@@ -769,7 +769,16 @@ def sym_exec_block(params):#符号执行一个块
         solver.pop()  # POP SOLVER CONTEXT弹出原来的要求解的表达式
 
         solver.push()  # SET A BOUNDARY FOR SOLVER
-        negated_branch_expression = Not(branch_expression)#翻转分支表达式再计算
+        negated_branch_expression = Not(branch_expression)#翻转分支表达式再计算,
+#branch_expression:If(code_size_Concat(0, Extract(159, 0, Ia_store_0)) == 0,
+#    0,
+#    1) !=
+# 0
+#negated_branch_expression：
+# Not(If(code_size_Concat(0, Extract(159, 0, Ia_store_0)) == 0,
+       0,
+    #    1) !=
+    # 0)
         solver.add(negated_branch_expression)
 
         if global_params.DEBUG_MODE:
@@ -808,9 +817,9 @@ def sym_exec_block(params):#符号执行一个块
                 if str(e) == "timeout":
                     raise e
 
-        solver.pop()  # POP SOLVER CONTEXT
-        updated_count_number = visited_edges[current_edge] - 1
-        visited_edges.update({current_edge: updated_count_number})
+        solver.pop()  # POP SOLVER CONTEXT z3解析器弹出上下文
+        updated_count_number = visited_edges[current_edge] - 1#visited_edges[current_edge]：1，current_edge：Edge(v1=337, v2=428)
+        visited_edges.update({current_edge: updated_count_number})#updated_count_number=0，update后{Edge(v1=428, v2=437): 1, Edge(v1=76, v2=324): 1, Edge(v1=337, v2=428): 0, Edge(v1=428, v2=441): 1, Edge(v1=324, v2=337): 1, Edge(v1=0, v2=0): 1, Edge(v1=0, v2=76): 1}
     else:
         updated_count_number = visited_edges[current_edge] - 1
         visited_edges.update({current_edge: updated_count_number})

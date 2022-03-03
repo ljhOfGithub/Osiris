@@ -37,8 +37,8 @@ def init_analysis():
 
 # Money flow: (source, destination, amount)
 
-def display_analysis(analysis):
-    logging.debug("Money flow: " + str(analysis["money_flow"]))
+def display_analysis(analysis):#analysis：{'sstore': {}, 'money_flow': [('Is', 'Ia', 'Iv')], 'money_concurrency_bug': [], 'gas': 742, 'sload': [0], 'reentrancy_bug': [], 'gas_mem': 9, 'time_dependency_bug': {3: 12, 4: 319, 5: 332, 6: 423, 7: 436}}
+    logging.debug("Money flow: " + str(analysis["money_flow"]))#[('Is', 'Ia', 'Iv')]
 
 # Check if this call has the Reentrancy bug
 # Return true if it does, false otherwise
