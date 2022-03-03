@@ -355,7 +355,7 @@ def collect_vertices(tokens):
     wait_for_push = False
     is_new_block = False
 
-    for tok_type, tok_string, (srow, scol), _, line_number in tokens:#处理tokenInfo对象，也是指令对象，包含指令的类型，具体的指令，指令的行号列号，舍弃最后发现的指令位置
+    for tok_type, tok_string, (srow, scol), _, line_number in tokens:#处理tokenInfo对象，也是指令对象，包含指令的类型，具体的指令，指令的行号列号，舍弃最后发现的指令位置，如果没有用step进去则会跳过调试
         if wait_for_push is True:#push后面的参数，push指令，第一行不是push
             push_val = ""#定义的指令类型：1是汇编指令NAME，2是立即数NUMBER，4是换行符NEW LINE，5是等于号=
             for ptok_type, ptok_string, _, _, _ in tokens:#
@@ -592,7 +592,7 @@ def sym_exec_block(params):#符号执行一个块
     global source_map
 
     block = params.block
-    pre_block = params.pre_block
+    pre_block = params.pre_block#初始值0
     visited = params.visited
     depth = params.depth
     stack = params.stack
@@ -607,7 +607,7 @@ def sym_exec_block(params):#符号执行一个块
     func_call = params.func_call#将对象的初始值传入变量
 
     Edge = namedtuple("Edge", ["v1", "v2"]) # Factory Function for tuples is used as dictionary key元组的Factory Function用作字典键
-    if block < 0:#无传参初始化后block：0
+    if block < 0:#无传参初始化后block：0，创建一个名为Edge的nametuple对象，域名分别为v1，v2
         log.debug("UNKNOWN JUMP ADDRESS. TERMINATING THIS PATH")#当前block地址非法
         return ["ERROR"]
 
@@ -615,36 +615,36 @@ def sym_exec_block(params):#符号执行一个块
         print("Reach block address " + hex(block))
         print("STACK: " + str(stack))
 
-    current_edge = Edge(pre_block, block)#获得当前要执行的边
-    if visited_edges.has_key(current_edge):#如果当前边已经遍历过
+    current_edge = Edge(pre_block, block)#获得当前要执行的边，current_edge=Edge(v1=0, v2=0)
+    if visited_edges.has_key(current_edge):#如果当前边已经遍历过，visited_edges：{}
         updated_count_number = visited_edges[current_edge] + 1#则更新当前边的计数
         visited_edges.update({current_edge: updated_count_number})
     else:
-        visited_edges.update({current_edge: 1})#否则初始化当前边
+        visited_edges.update({current_edge: 1})#否则初始化当前边，visited_edges：{Edge(v1=0, v2=0): 1}
 
     if visited_edges[current_edge] > global_params.LOOP_LIMIT:#如果当前边的执行次数过高则终止
         if global_params.DEBUG_MODE:
             print("Overcome a number of loop limit. Terminating this path ...")#克服多个循环限制。终止这条道路
         return stack
 
-    current_gas_used = analysis["gas"]#已经模拟的需要使用的gas
-    if current_gas_used > global_params.GAS_LIMIT:
+    current_gas_used = analysis["gas"]#已经模拟的需要使用的gas，初始化analysis["gas"]：0
+    if current_gas_used > global_params.GAS_LIMIT:#初始值global_params.GAS_LIMIT：4000000
         if global_params.DEBUG_MODE:
             print("Run out of gas. Terminating this path ... ")
         return stack
 
     # Execute every instruction, one at a time
     try:
-        block_ins = vertices[block].get_instructions()#当前边的指令列表
-    except KeyError:
+        block_ins = vertices[block].get_instructions()#当前边的指令列表，block：0，vertices[block]：<basicblock.BasicBlock instance at 0x7fc7ef157518>
+    except KeyError:#vertices[block].get_instructions()：['PUSH1 0x60 ', 'PUSH1 0x40 ', 'MSTORE ', 'PUSH1 0x04 ', 'CALLDATASIZE ', 'LT ', 'PUSH2 0x004c ', 'JUMPI ']
         if global_params.DEBUG_MODE:
             print("This path results in an exception, possibly an invalid jump address")#如果当前块的地址出错
         return ["ERROR"]
 
-    for instr in block_ins:#遍历块的每一个指令
+    for instr in block_ins:#遍历块的每一个指令，如'PUSH1 0x60 '
         if global_params.DEBUG_MODE:
             print(str(global_state["pc"])+" \t "+str(instr))#当前的pc和具体指令
-        params.instr = instr
+        params.instr = instr#将传入的parameter对象的一个属性设置为intr，初始值为空字符串
         sym_exec_ins(params)
     if global_params.DEBUG_MODE:
         print("")
@@ -829,25 +829,25 @@ def sym_exec_ins(params):#ethervm.io的所有单条指令
     if g_timeout:
         raise Exception("timeout")
 
-    start = params.block#设置当前指令执行时的环境
-    instr = params.instr#取出指令进行遍历
-    stack = params.stack
-    mem = params.mem
-    memory = params.memory
-    global_state = params.global_state
-    sha3_list = params.sha3_list
-    path_conditions_and_vars = params.path_conditions_and_vars
-    analysis = params.analysis
-    models = params.models
-    calls = params.calls
-    func_call = params.func_call
+    start = params.block#设置当前指令执行时的环境，start：0
+    instr = params.instr#取出指令进行遍历，instr：'PUSH1 0x60 '
+    stack = params.stack#[]
+    mem = params.mem#{}
+    memory = params.memory#[]
+    global_state = params.global_state#{'origin': tx.origin, 'gas_price': tx.gasprice, 'currentTimestamp': IH_s, 'miu_i': 0, 'currentCoinbase': IH_c, 'value': Iv, 'sender_address': Is, 'pc': 0, 'currentDifficulty': IH_d, 'Ia': {}, 'currentGasLimit': IH_l, 'receiver_address': Ia, 'balance': {'Ia': init_Ia + Iv, 'Is': init_Is - Iv}, 'currentNumber': IH_i}
+    sha3_list = params.sha3_list#{}
+    path_conditions_and_vars = params.path_conditions_and_vars#{'path_condition': [Iv >= 0, init_Is >= Iv, init_Ia >= 0], 'IH_s': IH_s, 'tx.origin': tx.origin, 'Is': Is, 'Iv': Iv, 'IH_d': IH_d, 'tx.gasprice': tx.gasprice, 'IH_c': IH_c, 'Ia': Ia, 'IH_l': IH_l, 'IH_i': IH_i}
+    analysis = params.analysis#{'sstore': {}, 'money_flow': [('Is', 'Ia', 'Iv')], 'sload': [], 'reentrancy_bug': [], 'money_concurrency_bug': [], 'gas_mem': 0, 'gas': 0, 'time_dependency_bug': {}}
+    models = params.models#[]
+    calls = params.calls#[]
+    func_call = params.func_call#-1
 
-    visited_pcs.add(global_state["pc"])
+    visited_pcs.add(global_state["pc"])#0;visited_pcs:set([0])
 
-    instr_parts = str.split(instr, ' ')#
+    instr_parts = str.split(instr, ' ')#['PUSH1', '0x60', '']
 
-    previous_stack = copy_all(stack)[0]
-    previous_pc = global_state["pc"]
+    previous_stack = copy_all(stack)[0]#copy_all(stack)[0]:[[]]
+    previous_pc = global_state["pc"]#0
 
     #if instr_parts[0] == "INVALID":
     #    return

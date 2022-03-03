@@ -95,7 +95,13 @@ def check_reentrancy_bug(path_conditions_and_vars, stack, global_state):
         #    r_report.write('\n'+cur_file)
         reported = True
     return ret_val
-
+# calculate_gas:
+# opcode = PUSH1
+# stack = []
+# mem = {}
+# global_state = {'origin': tx.origin, 'gas_price': tx.gasprice, 'currentTimestamp': IH_s, 'miu_i': 0, 'currentCoinbase': IH_c, 'value': Iv, 'sender_address': Is, 'pc': 0, 'currentDifficulty': IH_d, 'Ia': {}, 'currentGasLimit': IH_l, 'receiver_address': Ia, 'balance': {'Ia': init_Ia + Iv, 'Is': init_Is - Iv}, 'currentNumber': IH_i}
+# analysis = {'sstore': {}, 'money_flow': [('Is', 'Ia', 'Iv')], 'sload': [], 'reentrancy_bug': [], 'money_concurrency_bug': [], 'gas_mem': 0, 'gas': 0, 'time_dependency_bug': {}}
+# solver = []
 def calculate_gas(opcode, stack, mem, global_state, analysis, solver):
     gas_increment = get_ins_cost(opcode) # base cost
     gas_memory = analysis["gas_mem"]
@@ -187,7 +193,13 @@ def calculate_gas(opcode, stack, mem, global_state, analysis, solver):
     gas_increment += new_gas_memory - gas_memory
 
     return (gas_increment, new_gas_memory)
-
+#analysis = {'sstore': {}, 'money_flow': [('Is', 'Ia', 'Iv')], 'sload': [], 'reentrancy_bug': [], 'money_concurrency_bug': [], 'gas_mem': 0, 'gas': 0, 'time_dependency_bug': {}}
+##opcode：PUSH1
+#stack=[]
+#mem={}
+# global_state = {'origin': tx.origin, 'gas_price': tx.gasprice, 'currentTimestamp': IH_s, 'miu_i': 0, 'currentCoinbase': IH_c, 'value': Iv, 'sender_address': Is, 'pc': 0, 'currentDifficulty': IH_d, 'Ia': {}, 'currentGasLimit': IH_l, 'receiver_address': Ia, 'balance': {'Ia': init_Ia + Iv, 'Is': init_Is - Iv}, 'currentNumber': IH_i}
+# path_conditions_and_vars = {'path_condition': [Iv >= 0, init_Is >= Iv, init_Ia >= 0], 'IH_s': IH_s, 'tx.origin': tx.origin, 'Is': Is, 'Iv': Iv, 'IH_d': IH_d, 'tx.gasprice': tx.gasprice, 'IH_c': IH_c, 'Ia': Ia, 'IH_l': IH_l, 'IH_i': IH_i}
+# solver = []
 def update_analysis(analysis, opcode, stack, mem, global_state, path_conditions_and_vars, solver):
     gas_increment, gas_memory = calculate_gas(opcode, stack, mem, global_state, analysis, solver)
     analysis["gas"] += gas_increment

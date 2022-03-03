@@ -72,17 +72,17 @@ def custom_deepcopy(input):
             output[key] = input[key][:]
         elif isinstance(input[key], dict):
             #output[key] = custom_deepcopy(input[key])
-            output[key] = copy.deepcopy(input[key])
+            output[key] = copy.deepcopy(input[key])#递归深拷贝
         else:
             output[key] = copy.deepcopy(input[key])
     return output
 
-def copy_all(*args):
+def copy_all(*args):#args = ([],)
     output = []
     for arg in args:
-        if isinstance(arg, dict):
+        if isinstance(arg, dict):#如果是字典则深拷贝
             output.append(custom_deepcopy(arg))
-        elif isinstance(arg, list):
+        elif isinstance(arg, list):#如果是列表则直接加入列表，arg：[],output:[[]]
             output.append(list(arg))
         else:
             output.append(arg)

@@ -90,7 +90,7 @@ opcodes = {
 }
 
 # TO BE UPDATED IF ETHEREUM VM CHANGES their fee structure
-
+# 操作使用的gas
 GCOST = {
     "Gzero": 0,
     "Gbase": 2,
@@ -167,13 +167,13 @@ def get_opcode(opcode):
     raise ValueError('Bad Opcode' + opcode)
 
 
-def get_ins_cost(opcode):
+def get_ins_cost(opcode):#opcode=PUSH1
     if opcode in Wzero:
         return GCOST["Gzero"]
     elif opcode in Wbase:
         return GCOST["Gbase"]
     elif opcode in Wverylow or opcode.startswith("PUSH") or opcode.startswith("DUP") or opcode.startswith("SWAP"):
-        return GCOST["Gverylow"]
+        return GCOST["Gverylow"]#3
     elif opcode in Wlow:
         return GCOST["Glow"]
     elif opcode in Wmid:
