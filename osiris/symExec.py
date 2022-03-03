@@ -776,7 +776,7 @@ def sym_exec_block(params):#符号执行一个块
 # 0
 #negated_branch_expression：
 # Not(If(code_size_Concat(0, Extract(159, 0, Ia_store_0)) == 0,
-       0,
+    #    0,
     #    1) !=
     # 0)
         solver.add(negated_branch_expression)
@@ -792,7 +792,7 @@ def sym_exec_block(params):#符号执行一个块
                     isRightBranchFeasible = False
             except:
                 isRightBranchFeasible = False
-            if isRightBranchFeasible:
+            if isRightBranchFeasible:#vertices[block]：<basicblock.BasicBlock instance at 0x7fc7ef1919e0>，block337
                 right_branch = vertices[block].get_falls_to()#左分支是满足条件时跳转的，右分支是不满足条件时跳转的
                 new_params = params.copy()
                 new_params.depth = depth
